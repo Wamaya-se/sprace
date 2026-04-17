@@ -1,5 +1,5 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer'
-import { SPRACE_ENTITY, pdfStyles } from './styles'
+import { type PdfPartyEntity, pdfStyles } from './styles'
 
 export interface CreatorPayoutStatementData {
 	statementNumber: string
@@ -8,6 +8,7 @@ export interface CreatorPayoutStatementData {
 	amountTotal: number
 	platformFee: number
 	creatorPayout: number
+	platform: PdfPartyEntity
 	booking: {
 		id: string
 		title: string
@@ -44,7 +45,7 @@ export function CreatorPayoutStatement({
 	return (
 		<Document
 			title={`Payout statement ${data.statementNumber}`}
-			author="Sprace"
+			author={data.platform.legalName}
 			subject={`Booking ${data.booking.id}`}
 		>
 			<Page size="A4" style={pdfStyles.page}>
@@ -66,12 +67,21 @@ export function CreatorPayoutStatement({
 				<View style={pdfStyles.partiesRow}>
 					<View style={pdfStyles.party}>
 						<Text style={pdfStyles.partyLabel}>Issued by</Text>
-						<Text style={pdfStyles.partyName}>{SPRACE_ENTITY.legalName}</Text>
+						<Text style={pdfStyles.partyName}>{data.platform.legalName}</Text>
 						<Text style={pdfStyles.partyLine}>
-							Org.no {SPRACE_ENTITY.orgNumber}
+							Org.no {data.platform.orgNumber}
 						</Text>
-						<Text style={pdfStyles.partyLine}>{SPRACE_ENTITY.address}</Text>
-						<Text style={pdfStyles.partyLine}>{SPRACE_ENTITY.email}</Text>
+						{data.platform.vatNumber && data.platform.vatNumber !== '—' ? (
+							<Text style={pdfStyles.partyLine}>
+								VAT {data.platform.vatNumber}
+							</Text>
+						) : null}
+						{data.platform.addressLines.map((line) => (
+							<Text key={line} style={pdfStyles.partyLine}>
+								{line}
+							</Text>
+						))}
+						<Text style={pdfStyles.partyLine}>{data.platform.email}</Text>
 					</View>
 
 					<View style={pdfStyles.party}>
@@ -139,7 +149,7 @@ export function CreatorPayoutStatement({
 				</View>
 
 				<Text style={pdfStyles.footer} fixed>
-					{SPRACE_ENTITY.legalName} · {SPRACE_ENTITY.website} · Retain this
+					{data.platform.legalName} · {data.platform.website} · Retain this
 					statement for your tax records.
 				</Text>
 			</Page>

@@ -17,6 +17,24 @@ export default async function AdminSettingsPage() {
 	const { data: rows } = await supabase
 		.from('platform_settings')
 		.select('key, value')
+		.in('key', [
+			'platform_name',
+			'contact_email',
+			'active_locales',
+			'support_url',
+			'terms_url',
+			'privacy_url',
+			'platform_legal_name',
+			'platform_org_number',
+			'platform_vat_number',
+			'platform_address_line1',
+			'platform_address_line2',
+			'platform_postal_code',
+			'platform_city',
+			'platform_country_code',
+			'platform_billing_email',
+			'platform_website',
+		])
 
 	const settings: Record<string, string> = {}
 	for (const row of rows || []) {

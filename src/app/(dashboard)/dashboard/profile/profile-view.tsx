@@ -22,6 +22,10 @@ import { SectionEditorHeader } from './sections/section-editor-header'
 import { PhotoSection } from './sections/photo-section'
 import { LinksSection } from './sections/links-section'
 import { SpecialtiesSection } from './sections/specialties-section'
+import {
+	CreatorDac7Section,
+	type CreatorDac7ViewData,
+} from './creator-dac7-section'
 
 interface CreatorData {
 	id: string
@@ -48,6 +52,8 @@ interface ProfileViewProps {
 	}[]
 	selectedSpecialtyIds: string[]
 	selectedMarketIds: string[]
+	dac7: CreatorDac7ViewData
+	isDac7Complete: boolean
 }
 
 type EditingSection = 'about' | 'specialties' | 'links' | 'photo' | null
@@ -57,6 +63,8 @@ export function ProfileView({
 	avatarUrl,
 	specialties,
 	markets,
+	dac7,
+	isDac7Complete,
 	selectedSpecialtyIds,
 	selectedMarketIds,
 }: ProfileViewProps) {
@@ -306,6 +314,8 @@ export function ProfileView({
 				isPending={isPending}
 				otherEditing={editing !== null && editing !== 'links'}
 			/>
+
+			<CreatorDac7Section data={dac7} isComplete={isDac7Complete} />
 
 			<PhotoSection
 				displayName={creator.display_name}

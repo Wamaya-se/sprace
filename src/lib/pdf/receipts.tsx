@@ -10,6 +10,23 @@ import {
 	CreatorPayoutStatement,
 	type CreatorPayoutStatementData,
 } from '@/components/pdf/creator-payout-statement'
+import type { PdfPartyEntity } from '@/components/pdf/styles'
+import {
+	formatPlatformAddress,
+	getPlatformEntity,
+} from '@/lib/queries/platform-entity'
+
+async function getPdfPlatformParty(): Promise<PdfPartyEntity> {
+	const entity = await getPlatformEntity()
+	return {
+		legalName: entity.legalName,
+		orgNumber: entity.orgNumber,
+		vatNumber: entity.vatNumber,
+		addressLines: formatPlatformAddress(entity),
+		email: entity.billingEmail,
+		website: entity.website,
+	}
+}
 
 interface GeneratedPdf {
 	buffer: Buffer
@@ -100,12 +117,15 @@ export async function generateBusinessReceipt(
 	}
 	const receiptNumber = numberData
 
+	const platform = await getPdfPlatformParty()
+
 	const data: BusinessReceiptData = {
 		receiptNumber,
 		issuedAt: new Date(),
 		currency: payment.currency,
 		amountTotal: payment.amount_total,
 		platformFee: payment.platform_fee,
+		platform,
 		booking: { id: booking.id, title: booking.title },
 		business: {
 			companyName: booking.business.company_name,
@@ -147,6 +167,8 @@ export async function generateCreatorPayoutStatement(
 	}
 	const statementNumber = numberData
 
+	const platform = await getPdfPlatformParty()
+
 	const data: CreatorPayoutStatementData = {
 		statementNumber,
 		issuedAt: new Date(),
@@ -154,6 +176,7 @@ export async function generateCreatorPayoutStatement(
 		amountTotal: payment.amount_total,
 		platformFee: payment.platform_fee,
 		creatorPayout: payment.creator_payout,
+		platform,
 		booking: { id: booking.id, title: booking.title },
 		business: { companyName: booking.business.company_name },
 		creator: {

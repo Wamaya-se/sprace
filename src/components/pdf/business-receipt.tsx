@@ -1,5 +1,5 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer'
-import { SPRACE_ENTITY, pdfStyles } from './styles'
+import { type PdfPartyEntity, pdfStyles } from './styles'
 
 export interface BusinessReceiptData {
 	receiptNumber: string
@@ -7,6 +7,7 @@ export interface BusinessReceiptData {
 	currency: string
 	amountTotal: number
 	platformFee: number
+	platform: PdfPartyEntity
 	booking: {
 		id: string
 		title: string
@@ -45,7 +46,7 @@ export function BusinessReceipt({ data }: { data: BusinessReceiptData }) {
 	return (
 		<Document
 			title={`Receipt ${data.receiptNumber}`}
-			author="Sprace"
+			author={data.platform.legalName}
 			subject={`Booking ${data.booking.id}`}
 		>
 			<Page size="A4" style={pdfStyles.page}>
@@ -65,12 +66,21 @@ export function BusinessReceipt({ data }: { data: BusinessReceiptData }) {
 				<View style={pdfStyles.partiesRow}>
 					<View style={pdfStyles.party}>
 						<Text style={pdfStyles.partyLabel}>From</Text>
-						<Text style={pdfStyles.partyName}>{SPRACE_ENTITY.legalName}</Text>
+						<Text style={pdfStyles.partyName}>{data.platform.legalName}</Text>
 						<Text style={pdfStyles.partyLine}>
-							Org.no {SPRACE_ENTITY.orgNumber}
+							Org.no {data.platform.orgNumber}
 						</Text>
-						<Text style={pdfStyles.partyLine}>{SPRACE_ENTITY.address}</Text>
-						<Text style={pdfStyles.partyLine}>{SPRACE_ENTITY.email}</Text>
+						{data.platform.vatNumber && data.platform.vatNumber !== '—' ? (
+							<Text style={pdfStyles.partyLine}>
+								VAT {data.platform.vatNumber}
+							</Text>
+						) : null}
+						{data.platform.addressLines.map((line) => (
+							<Text key={line} style={pdfStyles.partyLine}>
+								{line}
+							</Text>
+						))}
+						<Text style={pdfStyles.partyLine}>{data.platform.email}</Text>
 					</View>
 
 					<View style={pdfStyles.party}>
@@ -143,7 +153,7 @@ export function BusinessReceipt({ data }: { data: BusinessReceiptData }) {
 				</View>
 
 				<Text style={pdfStyles.footer} fixed>
-					{SPRACE_ENTITY.legalName} · {SPRACE_ENTITY.website} · Retain this
+					{data.platform.legalName} · {data.platform.website} · Retain this
 					receipt for bookkeeping purposes.
 				</Text>
 			</Page>

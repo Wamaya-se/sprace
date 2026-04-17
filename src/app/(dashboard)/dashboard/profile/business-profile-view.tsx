@@ -8,6 +8,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateBusinessInfo, updateBusinessContact } from './business-actions'
+import {
+	BusinessBillingSection,
+	type BusinessBillingData,
+} from './business-billing-section'
 
 interface BusinessData {
 	id: string
@@ -20,11 +24,17 @@ interface BusinessData {
 
 interface BusinessProfileViewProps {
 	business: BusinessData
+	billing: BusinessBillingData
+	isBillingComplete: boolean
 }
 
 type EditingSection = 'info' | 'contact' | null
 
-export function BusinessProfileView({ business }: BusinessProfileViewProps) {
+export function BusinessProfileView({
+	business,
+	billing,
+	isBillingComplete,
+}: BusinessProfileViewProps) {
 	const t = useTranslations('dashboard')
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
@@ -228,6 +238,11 @@ export function BusinessProfileView({ business }: BusinessProfileViewProps) {
 					)}
 				</CardContent>
 			</Card>
+
+			<BusinessBillingSection
+				business={billing}
+				isComplete={isBillingComplete}
+			/>
 
 			{/* Contact & web section */}
 			<Card>

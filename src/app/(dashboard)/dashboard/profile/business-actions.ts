@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { ActionResult } from '@/types/actions'
+import { parseOrgNumber } from '@/lib/validation/se-identifiers'
 
 async function requireBusiness() {
 	const supabase = await createClient()
@@ -59,12 +60,42 @@ export async function updateBusinessInfo(
 		return { success: false, error: 'errors.invalidInput' }
 	}
 
+	let normalizedOrg: string | null = null
+	if (parsed.data.orgNumber) {
+		const info = parseOrgNumber(parsed.data.orgNumber)
+		if (!info) {
+			return {
+				success: false,
+				error: 'errors.invalidOrgNumber',
+				field: 'orgNumber',
+			}
+		}
+		normalizedOrg = info.formatted
+	}
+
+	// If the org number changes, verification must be re-done.
+	const { data: existing } = await supabase
+		.from('businesses')
+		.select('org_number, org_number_verification')
+		.eq('id', business.id)
+		.single()
+
+	const orgChanged = (existing?.org_number ?? null) !== (normalizedOrg ?? null)
+
 	const { error } = await supabase
 		.from('businesses')
 		.update({
 			company_name: parsed.data.companyName,
-			org_number: parsed.data.orgNumber || null,
+			org_number: normalizedOrg,
 			industry: parsed.data.industry || null,
+			...(orgChanged
+				? {
+						org_number_verification: 'unverified' as const,
+						org_number_verified_at: null,
+						org_number_verified_by: null,
+						org_number_verification_note: null,
+					}
+				: {}),
 		})
 		.eq('id', business.id)
 

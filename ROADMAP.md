@@ -377,11 +377,12 @@ _Lagkrav för svensk marknadsplats som hanterar betalningar._
 - [x] Sammanställning per kvartal/år: `/dashboard/earnings` (creator) och `/dashboard/spending` (business) med kvartals-/års-aggregering + CSV-export via `/api/earnings/csv` och `/api/spending/csv` (RFC 4180, BOM, SEK-belopp i major units).
 - [x] Admin: export av betalningsdata via `/api/admin/payments/csv` med alla bokföringsrelevanta kolumner (Stripe IDs, org.nummer, nummer).
 
-### Fas 7e.2 (kvar)
+### Fas 7e.2 (klar)
 
-- [ ] DAC7-förberedelse: utöka `businesses`/`profiles` med `personal_number`, `organization_number`, `birth_date`, `address`, `country_code`; formulär i onboarding/dashboard.
-- [ ] Business-verifiering: regex + Luhn-kontroll för svenska org.nummer + admin-verifieringssteg (extern API senare).
-- [ ] Platform-entitetens egna fält (`Sprace AB` org.nr, adress, VAT) i `platform_settings` istället för konstanter i `src/components/pdf/styles.ts`.
+- [x] DAC7-förberedelse: separat `creator_dac7`-tabell för känslig PII (personnummer AES-256-GCM-krypterat, födelsedatum, adress) + DAC7-fält på `businesses` (VAT, adress, land); formulär i dashboard med obligatorisk status innan checkout/payout.
+- [x] Business-verifiering: regex + Luhn-kontroll för svenska org.nummer i `src/lib/validation/se-identifiers.ts` + manuellt admin-verifieringssteg i `/admin/users/[id]` (extern API senare).
+- [x] Platform-entitetens egna fält (`Sprace AB` org.nr, adress, VAT) i `platform_settings` (seedade rader `platform_legal_name`, `platform_org_number`, …) istället för konstanter i `src/components/pdf/styles.ts`; PDF-komponenter tar nu entiteten som prop via `getPdfPlatformParty()`.
+- [x] `pii_access_log`-tabell + RLS för revisionsspår när admin tittar på personnummer.
 
 ## Fas 8: Analytics & Insights
 

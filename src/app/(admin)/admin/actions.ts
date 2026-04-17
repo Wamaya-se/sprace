@@ -126,3 +126,66 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
 	revalidatePath('/admin/users')
 	return { success: true, data: undefined }
 }
+
+// ---------- Business org.nr verification (DAC7) ----------
+
+const verifyOrgSchema = z.object({
+	businessId: z.string().uuid(),
+	decision: z.enum(['verified', 'rejected', 'pending', 'unverified']),
+	note: z.preprocess(
+		(v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+		z.string().trim().max(500).optional(),
+	),
+})
+
+export async function verifyBusinessOrgNumber(
+	businessId: string,
+	decision: 'verified' | 'rejected' | 'pending' | 'unverified',
+	note?: string,
+): Promise<ActionResult> {
+	const { user, supabase } = await requireAdmin()
+
+	const parsed = verifyOrgSchema.safeParse({ businessId, decision, note })
+	if (!parsed.success) {
+		return { success: false, error: 'errors.invalidInput' }
+	}
+
+	const { data: business, error: readError } = await supabase
+		.from('businesses')
+		.select('id, profile_id, org_number')
+		.eq('id', parsed.data.businessId)
+		.single()
+
+	if (readError || !business) {
+		return { success: false, error: 'errors.businessNotFound' }
+	}
+
+	if (
+		(parsed.data.decision === 'verified' ||
+			parsed.data.decision === 'pending') &&
+		!business.org_number
+	) {
+		return { success: false, error: 'errors.orgNumberMissing' }
+	}
+
+	const { error: updateError } = await supabase
+		.from('businesses')
+		.update({
+			org_number_verification: parsed.data.decision,
+			org_number_verified_at:
+				parsed.data.decision === 'verified' ? new Date().toISOString() : null,
+			org_number_verified_by:
+				parsed.data.decision === 'verified' ? user.id : null,
+			org_number_verification_note: parsed.data.note ?? null,
+		})
+		.eq('id', parsed.data.businessId)
+
+	if (updateError) {
+		console.error('[verifyBusinessOrgNumber]', updateError)
+		return { success: false, error: 'errors.couldNotVerifyOrgNumber' }
+	}
+
+	revalidatePath('/admin/users')
+	revalidatePath(`/admin/users/${business.profile_id}`)
+	return { success: true, data: undefined }
+}

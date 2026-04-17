@@ -159,13 +159,17 @@ export const pdfStyles = StyleSheet.create({
 	},
 })
 
-// Hard-coded platform-entity metadata. TODO: move to platform_settings
-// once Sprace AB is registered and the details are known.
-export const SPRACE_ENTITY = {
-	legalName: 'Sprace AB',
-	orgNumber: '—',
-	address: 'Stockholm, Sweden',
-	vatNumber: '—',
-	email: 'billing@sprace.com',
-	website: 'sprace.com',
-} as const
+/**
+ * Platform-entity metadata used on PDFs is loaded from `platform_settings`
+ * via `src/lib/queries/platform-entity.ts`. Keep PDF components
+ * dependency-free from Supabase so they can be rendered in tests and
+ * previews — the caller must pass a `PlatformEntity` into the component.
+ */
+export interface PdfPartyEntity {
+	legalName: string
+	orgNumber: string
+	vatNumber: string
+	addressLines: string[]
+	email: string
+	website: string
+}

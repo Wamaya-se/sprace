@@ -52,7 +52,11 @@ export async function createCheckoutSession(
 		.select(
 			`
 			id, status, title, budget, service_id,
-			business:businesses!bookings_business_id_fkey(id, profile_id, company_name),
+			business:businesses!bookings_business_id_fkey(
+				id, profile_id, company_name, org_number,
+				org_number_verification,
+				address_line1, postal_code, city, country_code
+			),
 			creator:creators!bookings_creator_id_fkey(id, profile_id, stripe_account_id, stripe_onboarding_complete),
 			service:services!bookings_service_id_fkey(id, name, price)
 		`,
@@ -68,6 +72,12 @@ export async function createCheckoutSession(
 		id: string
 		profile_id: string
 		company_name: string
+		org_number: string | null
+		org_number_verification: 'unverified' | 'pending' | 'verified' | 'rejected'
+		address_line1: string | null
+		postal_code: string | null
+		city: string | null
+		country_code: string | null
 	}
 	const creator = booking.creator as unknown as {
 		id: string
@@ -91,6 +101,21 @@ export async function createCheckoutSession(
 
 	if (!creator.stripe_account_id || !creator.stripe_onboarding_complete) {
 		return { success: false, error: 'errors.creatorNoPaymentAccount' }
+	}
+
+	// DAC7 completeness gate — business must have full billing/tax details
+	// before we can collect payment. Keeps us compliant with EU platform
+	// operator obligations.
+	const countryCode = biz.country_code ?? 'SE'
+	const billingComplete =
+		Boolean(biz.org_number?.trim()) &&
+		Boolean(biz.address_line1?.trim()) &&
+		Boolean(biz.postal_code?.trim()) &&
+		Boolean(biz.city?.trim()) &&
+		/^[A-Z]{2}$/.test(countryCode)
+
+	if (!billingComplete) {
+		return { success: false, error: 'errors.businessBillingIncomplete' }
 	}
 
 	const amountSek = booking.budget ?? service?.price
@@ -202,7 +227,11 @@ export async function processPayoutForBooking(
 			`
 			id, status, creator_payout, stripe_payment_intent_id, currency,
 			booking:bookings!payments_booking_id_fkey(
-				id, title, creator:creators!bookings_creator_id_fkey(stripe_account_id, profile_id, profile:profiles!creators_profile_id_fkey(email))
+				id, title,
+				creator:creators!bookings_creator_id_fkey(
+					id, stripe_account_id, profile_id,
+					profile:profiles!creators_profile_id_fkey(email)
+				)
 			)
 		`,
 		)
@@ -221,6 +250,7 @@ export async function processPayoutForBooking(
 		id: string
 		title: string
 		creator: {
+			id: string
 			stripe_account_id: string | null
 			profile_id: string
 			profile: { email: string } | null
@@ -234,6 +264,27 @@ export async function processPayoutForBooking(
 
 	if (!booking?.creator?.stripe_account_id) {
 		return { success: false, error: 'errors.creatorStripeNotFound' }
+	}
+
+	// DAC7 completeness gate — we must not transfer creator funds until
+	// we have the tax data we're legally required to report.
+	const { data: dac7 } = await supabase
+		.from('creator_dac7')
+		.select(
+			'personal_number_encrypted, address_line1, postal_code, city, country_code',
+		)
+		.eq('creator_id', booking.creator.id)
+		.maybeSingle()
+
+	const dac7Complete =
+		Boolean(dac7?.personal_number_encrypted) &&
+		Boolean(dac7?.address_line1?.trim()) &&
+		Boolean(dac7?.postal_code?.trim()) &&
+		Boolean(dac7?.city?.trim()) &&
+		/^[A-Z]{2}$/.test(dac7?.country_code ?? '')
+
+	if (!dac7Complete) {
+		return { success: false, error: 'errors.creatorDac7Incomplete' }
 	}
 
 	try {

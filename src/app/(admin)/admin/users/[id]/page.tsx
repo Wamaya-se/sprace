@@ -9,6 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { UserActions } from './components/user-actions'
+import {
+	BusinessVerificationPanel,
+	type BusinessVerificationData,
+} from './components/business-verification'
+import { isValidOrgNumber } from '@/lib/validation/se-identifiers'
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('metadata')
@@ -73,6 +78,8 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 		contactEmail: string | null
 	} | null = null
 
+	let businessVerification: BusinessVerificationData | null = null
+
 	if (profile.role === 'creator') {
 		const { data: creator } = await supabase
 			.from('creators')
@@ -126,7 +133,9 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 	if (profile.role === 'business') {
 		const { data: business } = await supabase
 			.from('businesses')
-			.select('company_name, org_number, website, industry, contact_email')
+			.select(
+				'id, company_name, org_number, website, industry, contact_email, org_number_verification, org_number_verified_at, org_number_verification_note',
+			)
 			.eq('profile_id', profile.id)
 			.single()
 
@@ -137,6 +146,16 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 				website: business.website,
 				industry: business.industry,
 				contactEmail: business.contact_email,
+			}
+			businessVerification = {
+				businessId: business.id,
+				orgNumber: business.org_number,
+				orgNumberVerification: business.org_number_verification,
+				orgNumberVerifiedAt: business.org_number_verified_at,
+				orgNumberVerificationNote: business.org_number_verification_note,
+				isOrgNumberFormatValid: business.org_number
+					? isValidOrgNumber(business.org_number)
+					: false,
 			}
 		}
 	}
@@ -455,6 +474,9 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 						creatorStatus={creatorData?.status}
 						isSelf={isSelf}
 					/>
+					{businessVerification && (
+						<BusinessVerificationPanel data={businessVerification} />
+					)}
 				</CardContent>
 			</Card>
 		</div>

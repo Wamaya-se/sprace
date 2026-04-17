@@ -51,4 +51,17 @@ export const env = {
 			process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development'
 		)
 	},
+	/**
+	 * Base64-encoded 32-byte AES-256-GCM key used to encrypt PII at rest
+	 * (currently: creators' Swedish personnummer). Treat like SUPABASE_SERVICE_ROLE_KEY.
+	 *
+	 * Generate a new key:
+	 *   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+	 *
+	 * Rotating the key requires re-encrypting existing ciphertext with
+	 * the old key first — don't swap it without a migration plan.
+	 */
+	get piiEncryptionKey() {
+		return getRequiredEnv('PII_ENCRYPTION_KEY')
+	},
 }

@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { useActionError } from '@/hooks/use-action-error'
 import { updatePlatformSettings } from './actions'
 
 interface SettingsFormProps {
@@ -18,7 +19,9 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 	const t = useTranslations('admin')
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
+	const translateError = useActionError()
 	const [error, setError] = useState<string | null>(null)
+	const [errorField, setErrorField] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 
 	const [platformName, setPlatformName] = useState(settings.platform_name || '')
@@ -30,8 +33,30 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 	const [termsUrl, setTermsUrl] = useState(settings.terms_url || '')
 	const [privacyUrl, setPrivacyUrl] = useState(settings.privacy_url || '')
 
+	const [legalName, setLegalName] = useState(settings.platform_legal_name || '')
+	const [orgNumber, setOrgNumber] = useState(settings.platform_org_number || '')
+	const [vatNumber, setVatNumber] = useState(settings.platform_vat_number || '')
+	const [addressLine1, setAddressLine1] = useState(
+		settings.platform_address_line1 || '',
+	)
+	const [addressLine2, setAddressLine2] = useState(
+		settings.platform_address_line2 || '',
+	)
+	const [postalCode, setPostalCode] = useState(
+		settings.platform_postal_code || '',
+	)
+	const [city, setCity] = useState(settings.platform_city || '')
+	const [countryCode, setCountryCode] = useState(
+		settings.platform_country_code || 'SE',
+	)
+	const [billingEmail, setBillingEmail] = useState(
+		settings.platform_billing_email || '',
+	)
+	const [website, setWebsite] = useState(settings.platform_website || '')
+
 	function handleSave() {
 		setError(null)
+		setErrorField(null)
 		setSuccess(false)
 		startTransition(async () => {
 			const result = await updatePlatformSettings([
@@ -41,10 +66,24 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 				{ key: 'support_url', value: supportUrl.trim() },
 				{ key: 'terms_url', value: termsUrl.trim() },
 				{ key: 'privacy_url', value: privacyUrl.trim() },
+				{ key: 'platform_legal_name', value: legalName.trim() },
+				{ key: 'platform_org_number', value: orgNumber.trim() },
+				{ key: 'platform_vat_number', value: vatNumber.trim() },
+				{ key: 'platform_address_line1', value: addressLine1.trim() },
+				{ key: 'platform_address_line2', value: addressLine2.trim() },
+				{ key: 'platform_postal_code', value: postalCode.trim() },
+				{ key: 'platform_city', value: city.trim() },
+				{
+					key: 'platform_country_code',
+					value: countryCode.trim().toUpperCase(),
+				},
+				{ key: 'platform_billing_email', value: billingEmail.trim() },
+				{ key: 'platform_website', value: website.trim() },
 			])
 
 			if (!result.success) {
-				setError(t('settingsSaveFailed'))
+				setError(translateError(result.error) || t('settingsSaveFailed'))
+				setErrorField(result.field ?? null)
 			} else {
 				setSuccess(true)
 				router.refresh()
@@ -69,7 +108,6 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 				</div>
 			)}
 
-			{/* General settings */}
 			<Card>
 				<CardContent>
 					<h2 className="font-heading text-base font-bold tracking-[-0.02em] text-foreground">
@@ -99,6 +137,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 								onChange={(e) => setContactEmail(e.target.value)}
 								placeholder="hello@sprace.com"
 								className="mt-1.5"
+								aria-invalid={errorField === 'contact_email' || undefined}
 							/>
 							<p className="mt-1 font-sans text-xs text-muted-foreground">
 								{t('contactEmailHint')}
@@ -122,7 +161,154 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 				</CardContent>
 			</Card>
 
-			{/* Links settings */}
+			<Card>
+				<CardContent>
+					<h2 className="font-heading text-base font-bold tracking-[-0.02em] text-foreground">
+						{t('settingsPlatformEntity')}
+					</h2>
+					<p className="mt-1 font-sans text-xs text-muted-foreground">
+						{t('settingsPlatformEntityHint')}
+					</p>
+
+					<div className="mt-4 space-y-4">
+						<div>
+							<Label htmlFor="platform-legal-name">
+								{t('platformLegalNameLabel')}
+							</Label>
+							<Input
+								id="platform-legal-name"
+								value={legalName}
+								onChange={(e) => setLegalName(e.target.value)}
+								placeholder="Sprace AB"
+								className="mt-1.5"
+							/>
+						</div>
+
+						<div className="grid gap-4 sm:grid-cols-2">
+							<div>
+								<Label htmlFor="platform-org-number">
+									{t('platformOrgNumberLabel')}
+								</Label>
+								<Input
+									id="platform-org-number"
+									value={orgNumber}
+									onChange={(e) => setOrgNumber(e.target.value)}
+									placeholder="556123-4567"
+									className="mt-1.5"
+									aria-invalid={
+										errorField === 'platform_org_number' || undefined
+									}
+								/>
+							</div>
+							<div>
+								<Label htmlFor="platform-vat-number">
+									{t('platformVatNumberLabel')}
+								</Label>
+								<Input
+									id="platform-vat-number"
+									value={vatNumber}
+									onChange={(e) => setVatNumber(e.target.value)}
+									placeholder="SE556123456701"
+									className="mt-1.5"
+								/>
+							</div>
+						</div>
+
+						<div>
+							<Label htmlFor="platform-address-line1">
+								{t('platformAddressLine1Label')}
+							</Label>
+							<Input
+								id="platform-address-line1"
+								value={addressLine1}
+								onChange={(e) => setAddressLine1(e.target.value)}
+								className="mt-1.5"
+							/>
+						</div>
+						<div>
+							<Label htmlFor="platform-address-line2">
+								{t('platformAddressLine2Label')}
+							</Label>
+							<Input
+								id="platform-address-line2"
+								value={addressLine2}
+								onChange={(e) => setAddressLine2(e.target.value)}
+								className="mt-1.5"
+							/>
+						</div>
+
+						<div className="grid gap-4 sm:grid-cols-3">
+							<div>
+								<Label htmlFor="platform-postal-code">
+									{t('platformPostalCodeLabel')}
+								</Label>
+								<Input
+									id="platform-postal-code"
+									value={postalCode}
+									onChange={(e) => setPostalCode(e.target.value)}
+									className="mt-1.5"
+								/>
+							</div>
+							<div>
+								<Label htmlFor="platform-city">{t('platformCityLabel')}</Label>
+								<Input
+									id="platform-city"
+									value={city}
+									onChange={(e) => setCity(e.target.value)}
+									className="mt-1.5"
+								/>
+							</div>
+							<div>
+								<Label htmlFor="platform-country-code">
+									{t('platformCountryCodeLabel')}
+								</Label>
+								<Input
+									id="platform-country-code"
+									value={countryCode}
+									onChange={(e) => setCountryCode(e.target.value.toUpperCase())}
+									maxLength={2}
+									placeholder="SE"
+									className="mt-1.5"
+									aria-invalid={
+										errorField === 'platform_country_code' || undefined
+									}
+								/>
+							</div>
+						</div>
+
+						<div>
+							<Label htmlFor="platform-billing-email">
+								{t('platformBillingEmailLabel')}
+							</Label>
+							<Input
+								id="platform-billing-email"
+								type="email"
+								value={billingEmail}
+								onChange={(e) => setBillingEmail(e.target.value)}
+								placeholder="billing@sprace.com"
+								className="mt-1.5"
+								aria-invalid={
+									errorField === 'platform_billing_email' || undefined
+								}
+							/>
+						</div>
+
+						<div>
+							<Label htmlFor="platform-website">
+								{t('platformWebsiteLabel')}
+							</Label>
+							<Input
+								id="platform-website"
+								value={website}
+								onChange={(e) => setWebsite(e.target.value)}
+								placeholder="sprace.com"
+								className="mt-1.5"
+							/>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
 			<Card>
 				<CardContent>
 					<h2 className="font-heading text-base font-bold tracking-[-0.02em] text-foreground">
@@ -174,7 +360,6 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 				</CardContent>
 			</Card>
 
-			{/* Save button */}
 			<div className="flex justify-end">
 				<Button variant="brand" onClick={handleSave} disabled={isPending}>
 					{isPending ? t('savingSettings') : t('saveSettings')}

@@ -167,44 +167,173 @@ export type Database = {
       }
       businesses: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
           company_name: string
           contact_email: string | null
+          country_code: string | null
           created_at: string
           id: string
           industry: string | null
           org_number: string | null
+          org_number_verification: Database["public"]["Enums"]["org_number_verification_status"]
+          org_number_verification_note: string | null
+          org_number_verified_at: string | null
+          org_number_verified_by: string | null
+          postal_code: string | null
           profile_id: string
           updated_at: string
+          vat_number: string | null
           website: string | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           company_name: string
           contact_email?: string | null
+          country_code?: string | null
           created_at?: string
           id?: string
           industry?: string | null
           org_number?: string | null
+          org_number_verification?: Database["public"]["Enums"]["org_number_verification_status"]
+          org_number_verification_note?: string | null
+          org_number_verified_at?: string | null
+          org_number_verified_by?: string | null
+          postal_code?: string | null
           profile_id: string
           updated_at?: string
+          vat_number?: string | null
           website?: string | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
           company_name?: string
           contact_email?: string | null
+          country_code?: string | null
           created_at?: string
           id?: string
           industry?: string | null
           org_number?: string | null
+          org_number_verification?: Database["public"]["Enums"]["org_number_verification_status"]
+          org_number_verification_note?: string | null
+          org_number_verified_at?: string | null
+          org_number_verified_by?: string | null
+          postal_code?: string | null
           profile_id?: string
           updated_at?: string
+          vat_number?: string | null
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "businesses_org_number_verified_by_fkey"
+            columns: ["org_number_verified_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "businesses_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_dac7: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          birth_date: string | null
+          city: string | null
+          country_code: string | null
+          created_at: string
+          creator_id: string
+          personal_number_encrypted: string | null
+          personal_number_last4: string | null
+          postal_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          creator_id: string
+          personal_number_encrypted?: string | null
+          personal_number_last4?: string | null
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          birth_date?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          creator_id?: string
+          personal_number_encrypted?: string | null
+          personal_number_last4?: string | null
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_dac7_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: true
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pii_access_log: {
+        Row: {
+          actor_id: string
+          created_at: string
+          field: string
+          id: string
+          reason: string | null
+          subject_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          field: string
+          id?: string
+          reason?: string | null
+          subject_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          field?: string
+          id?: string
+          reason?: string | null
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pii_access_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pii_access_log_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1031,6 +1160,11 @@ export type Database = {
         | "resolved_partial"
         | "dismissed"
       media_type: "image" | "video"
+      org_number_verification_status:
+        | "unverified"
+        | "pending"
+        | "verified"
+        | "rejected"
       notification_type:
         | "booking_created"
         | "booking_accepted"
@@ -1200,6 +1334,12 @@ export const Constants = {
       ],
       creator_status: ["draft", "pending_review", "active", "suspended"],
       delivery_status: ["submitted", "approved", "revision_requested"],
+      org_number_verification_status: [
+        "unverified",
+        "pending",
+        "verified",
+        "rejected",
+      ],
       dispute_status: [
         "open",
         "under_review",

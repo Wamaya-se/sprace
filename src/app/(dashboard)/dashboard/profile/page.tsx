@@ -2,6 +2,11 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+	getMyCreatorDac7,
+	isBusinessDac7Complete,
+	isCreatorDac7Complete,
+} from '@/lib/queries/dac7'
 import { OnboardingWizard } from './onboarding-wizard'
 import { ProfileView } from './profile-view'
 import { BusinessProfileView } from './business-profile-view'
@@ -39,7 +44,9 @@ async function renderBusinessProfile(
 ) {
 	const { data: business } = await supabase
 		.from('businesses')
-		.select('id, company_name, org_number, website, industry, contact_email')
+		.select(
+			'id, company_name, org_number, website, industry, contact_email, vat_number, address_line1, address_line2, postal_code, city, country_code, org_number_verification',
+		)
 		.eq('profile_id', userId)
 		.single()
 
@@ -47,7 +54,42 @@ async function renderBusinessProfile(
 		redirect('/dashboard')
 	}
 
-	return <BusinessProfileView business={business} />
+	const billing = {
+		vatNumber: business.vat_number,
+		addressLine1: business.address_line1,
+		addressLine2: business.address_line2,
+		postalCode: business.postal_code,
+		city: business.city,
+		countryCode: business.country_code ?? 'SE',
+		orgNumberVerification: business.org_number_verification,
+	}
+
+	const isBillingComplete = isBusinessDac7Complete({
+		id: business.id,
+		orgNumber: business.org_number,
+		orgNumberVerification: business.org_number_verification,
+		vatNumber: business.vat_number,
+		addressLine1: business.address_line1,
+		addressLine2: business.address_line2,
+		postalCode: business.postal_code,
+		city: business.city,
+		countryCode: business.country_code ?? 'SE',
+	})
+
+	return (
+		<BusinessProfileView
+			business={{
+				id: business.id,
+				company_name: business.company_name,
+				org_number: business.org_number,
+				website: business.website,
+				industry: business.industry,
+				contact_email: business.contact_email,
+			}}
+			billing={billing}
+			isBillingComplete={isBillingComplete}
+		/>
+	)
 }
 
 async function renderCreatorProfile(
@@ -98,6 +140,31 @@ async function renderCreatorProfile(
 	)
 	const selectedMarketIds = (creatorMarkets || []).map((cm) => cm.market_id)
 
+	const dac7Summary = (await getMyCreatorDac7(creator.id)) ?? {
+		creatorId: creator.id,
+		hasPersonalNumber: false,
+		personalNumberLast4: null,
+		birthDate: null,
+		addressLine1: null,
+		addressLine2: null,
+		postalCode: null,
+		city: null,
+		countryCode: 'SE',
+	}
+
+	const dac7View = {
+		hasPersonalNumber: dac7Summary.hasPersonalNumber,
+		personalNumberLast4: dac7Summary.personalNumberLast4,
+		birthDate: dac7Summary.birthDate,
+		addressLine1: dac7Summary.addressLine1,
+		addressLine2: dac7Summary.addressLine2,
+		postalCode: dac7Summary.postalCode,
+		city: dac7Summary.city,
+		countryCode: dac7Summary.countryCode ?? 'SE',
+	}
+
+	const isDac7Complete = isCreatorDac7Complete(dac7Summary)
+
 	if (creator.status === 'draft') {
 		return (
 			<OnboardingWizard
@@ -119,6 +186,8 @@ async function renderCreatorProfile(
 			markets={markets || []}
 			selectedSpecialtyIds={selectedSpecialtyIds}
 			selectedMarketIds={selectedMarketIds}
+			dac7={dac7View}
+			isDac7Complete={isDac7Complete}
 		/>
 	)
 }
