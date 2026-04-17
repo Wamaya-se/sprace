@@ -17,6 +17,7 @@ const creatorTitleKeys: Record<string, string> = {
 	'/dashboard/profile': 'profile',
 	'/dashboard/services': 'services',
 	'/dashboard/services/new': 'services',
+	'/dashboard/earnings': 'earnings',
 	'/dashboard/settings': 'settings',
 }
 
@@ -31,6 +32,7 @@ const businessTitleKeys: Record<string, string> = {
 	'/dashboard/reviews': 'reviews',
 	'/dashboard/campaigns': 'campaigns',
 	'/dashboard/profile': 'companyProfile',
+	'/dashboard/spending': 'spending',
 	'/dashboard/settings': 'settings',
 }
 

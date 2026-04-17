@@ -58,9 +58,16 @@ export default async function AdminPaymentsPage({ searchParams }: PageProps) {
 
 	return (
 		<div className="mx-auto max-w-5xl">
-			<p className="font-sans text-base leading-[1.7] text-muted-foreground">
-				{t('paymentsDescription')}
-			</p>
+			<div className="flex items-center justify-between gap-4">
+				<p className="font-sans text-base leading-[1.7] text-muted-foreground">
+					{t('paymentsDescription')}
+				</p>
+				<Button variant="outline" size="sm" asChild>
+					<a href="/api/admin/payments/csv" download>
+						{t('exportCsv')}
+					</a>
+				</Button>
+			</div>
 
 			{!payments || payments.length === 0 ? (
 				<div className="mt-12 text-center">

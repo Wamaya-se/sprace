@@ -370,12 +370,18 @@ _Konvertera besökare till användare — separata flows för kreatörer och fö
 
 _Lagkrav för svensk marknadsplats som hanterar betalningar._
 
-- [ ] Automatiska kvitton till businesses (PDF/e-post efter betalning)
-- [ ] Utbetalningsspecifikationer till creators (underlag per utbetalning)
-- [ ] Sammanställning per kvartal/år (för deklaration)
-- [ ] DAC7-förberedelse: plattformsrapportering av säljarintäkter till Skatteverket
-- [ ] Business-verifiering: validera org.nummer mot externt API (Bolagsverket/allabolag)
-- [ ] Admin: export av betalningsdata (CSV) för bokföring
+### Fas 7e.1 (klar)
+
+- [x] Automatiska kvitton till businesses: PDF via `@react-pdf/renderer`, e-post med bifogad PDF direkt efter `checkout.session.completed`. Sekventiella nummer `SPR-R-<år>-<seq>` via `assign_receipt_number` (SECURITY DEFINER, idempotent). On-demand nedladdning via `/api/receipts/[paymentId]` med ägar-/admin-auth.
+- [x] Utbetalningsspecifikationer till creators: PDF + e-post efter lyckad Stripe-transfer i `processPayoutForBooking`. Numrering `SPR-P-<år>-<seq>`. Nedladdning via `/api/payout-statements/[paymentId]`.
+- [x] Sammanställning per kvartal/år: `/dashboard/earnings` (creator) och `/dashboard/spending` (business) med kvartals-/års-aggregering + CSV-export via `/api/earnings/csv` och `/api/spending/csv` (RFC 4180, BOM, SEK-belopp i major units).
+- [x] Admin: export av betalningsdata via `/api/admin/payments/csv` med alla bokföringsrelevanta kolumner (Stripe IDs, org.nummer, nummer).
+
+### Fas 7e.2 (kvar)
+
+- [ ] DAC7-förberedelse: utöka `businesses`/`profiles` med `personal_number`, `organization_number`, `birth_date`, `address`, `country_code`; formulär i onboarding/dashboard.
+- [ ] Business-verifiering: regex + Luhn-kontroll för svenska org.nummer + admin-verifieringssteg (extern API senare).
+- [ ] Platform-entitetens egna fält (`Sprace AB` org.nr, adress, VAT) i `platform_settings` istället för konstanter i `src/components/pdf/styles.ts`.
 
 ## Fas 8: Analytics & Insights
 

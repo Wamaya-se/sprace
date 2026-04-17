@@ -180,6 +180,23 @@ const bookingsIcon = (
 	</svg>
 )
 
+const earningsIcon = (
+	<svg
+		className="h-5 w-5"
+		fill="none"
+		viewBox="0 0 24 24"
+		stroke="currentColor"
+		strokeWidth={1.5}
+		aria-hidden="true"
+	>
+		<path
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+		/>
+	</svg>
+)
+
 const companyProfileIcon = (
 	<svg
 		className="h-5 w-5"
@@ -203,6 +220,7 @@ const creatorNavItems: NavItem[] = [
 	{ labelKey: 'messages', href: '/dashboard/messages', icon: messagesIcon },
 	{ labelKey: 'profile', href: '/dashboard/profile', icon: profileIcon },
 	{ labelKey: 'services', href: '/dashboard/services', icon: servicesIcon },
+	{ labelKey: 'earnings', href: '/dashboard/earnings', icon: earningsIcon },
 	{ labelKey: 'settings', href: '/dashboard/settings', icon: settingsIcon },
 ]
 
@@ -218,6 +236,7 @@ const businessNavItems: NavItem[] = [
 		href: '/dashboard/profile',
 		icon: companyProfileIcon,
 	},
+	{ labelKey: 'spending', href: '/dashboard/spending', icon: earningsIcon },
 	{ labelKey: 'settings', href: '/dashboard/settings', icon: settingsIcon },
 ]
 
