@@ -23,6 +23,13 @@
 		"socialTikTok": "TikTok",
 		"socialLinkedIn": "LinkedIn"
 	},
+	"cookieConsent": {
+		"ariaLabel": "Cookie notice",
+		"title": "We use essential cookies only",
+		"description": "Sprace uses only essential cookies required for authentication and session management. We do not use tracking, advertising, or third-party analytics cookies. Read more in our <link>privacy policy</link>.",
+		"accept": "Got it",
+		"learnMore": "Learn more"
+	},
 	"nav": {
 		"creators": "Creators",
 		"howItWorks": "How it works",

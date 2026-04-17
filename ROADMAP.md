@@ -314,7 +314,7 @@ _Lagkrav och grundfunktioner som måste finnas innan riktiga användare._
 - [x] ToS-samtycke vid registrering: checkbox med länkar till /terms + /privacy, `tos_accepted_at` + `tos_version` i profiles
 - [x] Integritetspolicy-sida (`/privacy`) med GDPR-korrekt innehåll
 - [x] Användarvillkor-sida (`/terms`) med plattformsspecifikt innehåll
-- [ ] Cookie-consent banner (samordnas med Fas 7d — inga tracking-cookies idag, bara essentiella)
+- [x] Cookie-consent banner: `CookieConsent`-komponent mountad i root layout. SSR-säker via `useSyncExternalStore` (ingen hydration-mismatch), versionerat localStorage-key (`sprace-cookie-consent` + CONSENT_VERSION), Escape för dismiss, autoFocus på "Got it", `role="region"` + `aria-label`, länk till `/privacy`, i18n-namespace `cookieConsent`. Essential-only budskap (inga tracking-cookies).
 
 ### Rapportering & Blockering (framtida)
 
@@ -364,7 +364,7 @@ _Konvertera besökare till användare — separata flows för kreatörer och fö
 - [x] Sticky navbar med scroll-effekt (transparent → solid bg, client component)
 - [x] Mobilmeny (hamburger → slide-in drawer, inert/Escape/focus-restore/body-scroll-lock)
 - [x] Footer med sitemap-länkar (platform, company, legal), sociala medier (Instagram/TikTok/LinkedIn), nyhetsbrev-signup
-- [ ] Cookie-consent banner (samordnas med GDPR i Fas 6d)
+- [x] Cookie-consent banner (se Fas 6d)
 
 ## Fas 7e: Fakturering & Skatteunderlag
 

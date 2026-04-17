@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Epilogue, Manrope } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
+import { CookieConsent } from '@/components/shared/cookie-consent'
 import { ThemeProvider } from '@/components/shared/theme-provider'
 import { WebVitalsReporter } from '@/components/shared/web-vitals-reporter'
 import './globals.css'
@@ -55,6 +56,7 @@ export default async function RootLayout({
 					<NextIntlClientProvider messages={messages}>
 						<WebVitalsReporter />
 						{children}
+						<CookieConsent />
 					</NextIntlClientProvider>
 				</ThemeProvider>
 			</body>
