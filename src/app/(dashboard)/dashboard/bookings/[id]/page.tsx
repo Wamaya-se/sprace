@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator'
 import { BookingActions } from '@/components/dashboard/booking-actions'
 import { MessageThread } from '@/components/dashboard/message-thread'
 import { PaymentCard } from '@/components/dashboard/payment-card'
+import { ReportDialog } from '@/components/shared/report-dialog'
 import { getDisputeForBooking } from '@/lib/queries/disputes'
 import {
 	DeliverySectionWrapper,
@@ -209,6 +210,8 @@ export default async function BookingDetailPage({
 						})}
 					</p>
 				</div>
+
+				<ReportDialog targetType="booking" targetId={booking.id} />
 			</div>
 
 			{/* Contextual status banners */}

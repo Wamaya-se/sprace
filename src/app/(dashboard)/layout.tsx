@@ -28,10 +28,18 @@ export default async function DashboardLayout({
 
 	const [{ data: profile }, unreadCount, unreadNotifications] =
 		await Promise.all([
-			supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+			supabase
+				.from('profiles')
+				.select('full_name, is_suspended')
+				.eq('id', user.id)
+				.single(),
 			getUnreadCount(),
 			getUnreadNotificationCount(),
 		])
+
+	if (profile?.is_suspended) {
+		redirect('/suspended')
+	}
 
 	return (
 		<div className="flex min-h-screen bg-surface">

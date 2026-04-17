@@ -316,11 +316,13 @@ _Lagkrav och grundfunktioner som måste finnas innan riktiga användare._
 - [x] Användarvillkor-sida (`/terms`) med plattformsspecifikt innehåll
 - [x] Cookie-consent banner: `CookieConsent`-komponent mountad i root layout. SSR-säker via `useSyncExternalStore` (ingen hydration-mismatch), versionerat localStorage-key (`sprace-cookie-consent` + CONSENT_VERSION), Escape för dismiss, autoFocus på "Got it", `role="region"` + `aria-label`, länk till `/privacy`, i18n-namespace `cookieConsent`. Essential-only budskap (inga tracking-cookies).
 
-### Rapportering & Blockering (framtida)
+### Rapportering & Blockering ✅
 
-- [ ] Rapportera profil/innehåll (flagging → admin moderation-kö)
-- [ ] Blockera användare (dölj från discover/meddelanden)
-- [ ] Admin: moderation-dashboard (rapporterade profiler, tjänster, meddelanden)
+- [x] Rapportera profil/innehåll (flagging → admin moderation-kö): `reports`-tabell (`report_target_type`, `report_category`, `report_status` enums) med RLS, `createReport` Server Action (Zod + rate-limit + duplicate-guard), delad `ReportDialog`-komponent på kreatörsprofil (`/creators/[slug]`) och booking-detalj. `reports` i18n-namespace.
+- [x] Blockera användare (dölj från discover/kategori/landing): `user_blocks`-tabell med unikt blocker/blocked-par + RLS, `blockUser`/`unblockUser` Server Actions, `BlockCreatorButton` på kreatörsprofil. `search_creators` RPC tar `p_blocked_profile_ids` och filtrerar `profiles.is_suspended = false`. Discover-sidan, kategori-sidan och landing top-creators filtrerar via `getBlockedProfileIds()` + `profile.is_suspended = false`. Blockerad användare kan fortfarande nå kreatörens publika profil (med unblock-knapp).
+- [x] Admin moderation-dashboard: `/admin/reports` med filter-tabs (all/pending/reviewing/resolved/dismissed), detalj-kort per rapport, `ReportActions` (start review/resolve/dismiss + suspendera användare). Sidebar-länk, `loading.tsx` skeleton. `moderation` i18n-namespace.
+- [x] Suspendering: `profiles.is_suspended/suspended_at/suspended_by/suspension_reason`, `suspendUser`/`unsuspendUser` Server Actions (admin-only, kan inte suspendera admin eller sig själv) som samtidigt sätter `creators.status = 'suspended'` och signerar ut användaren via `auth.admin.signOut`. Notifieringar: `report_resolved` + `account_suspended`. `SuspensionActions` på admin user-detalj. Ny `/suspended` sida + dashboard-layout-guard som redirectar suspenderade användare.
+- [x] Pure schema-modul: `src/lib/validation/moderation.ts` (createReportSchema, resolveReportSchema, suspendUserSchema) så schemas är importerbara i både Server Actions och tester. Unit-tester i `tests/unit/moderation-schemas.test.ts` (15 tester).
 
 ## Fas 7: Publik frontend (marknadsföringssidor)
 

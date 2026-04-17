@@ -7,8 +7,12 @@ import { env } from '@/lib/env'
 import { Button } from '@/components/ui/button'
 import { CreatorPublicProfile } from '@/components/shared/creator-public-profile'
 import { JsonLd } from '@/components/shared/json-ld'
+import { ReportDialog } from '@/components/shared/report-dialog'
+import { BlockCreatorButton } from '@/components/shared/block-creator-button'
 import { getCreatorReviews } from '@/lib/queries/reviews'
 import { getOrganizationJsonLd } from '@/lib/seo/organization'
+import { getBlockedProfileIds } from '@/lib/queries/blocks'
+import { getOptionalUser } from '@/lib/auth/guards'
 
 interface PageProps {
 	params: Promise<{ slug: string }>
@@ -34,8 +38,9 @@ const getCreator = cache(async function getCreator(slug: string) {
 			slug,
 			status,
 			created_at,
-			profile:profiles!creators_profile_id_fkey (
-				avatar_url
+			profile:profiles!creators_profile_id_fkey!inner (
+				avatar_url,
+				is_suspended
 			),
 			specialties:creator_specialties (
 				specialty:specialties (
@@ -71,6 +76,7 @@ const getCreator = cache(async function getCreator(slug: string) {
 		)
 		.eq('slug', slug)
 		.eq('status', 'active')
+		.eq('profile.is_suspended', false)
 		.single()
 
 	if (error || !creator) return null
@@ -159,11 +165,27 @@ export default async function CreatorProfilePage({ params }: PageProps) {
 		return <CreatorNotFound />
 	}
 
-	const [reviewData, organization] = await Promise.all([
+	const [reviewData, organization, viewer, blockedIds] = await Promise.all([
 		getCreatorReviews(creator.profile_id),
 		getOrganizationJsonLd(),
+		getOptionalUser(),
+		getBlockedProfileIds(),
 	])
 	const { reviews, averageRating, totalCount } = reviewData
+	const isOwnProfile = viewer?.user.id === creator.profile_id
+	const canModerate = Boolean(viewer) && !isOwnProfile
+	const isBlocked = blockedIds.includes(creator.profile_id)
+
+	const moderationActions = canModerate ? (
+		<div className="flex flex-wrap items-center gap-2">
+			<ReportDialog targetType="profile" targetId={creator.profile_id} />
+			<BlockCreatorButton
+				profileId={creator.profile_id}
+				displayName={creator.display_name}
+				isBlocked={isBlocked}
+			/>
+		</div>
+	) : null
 
 	const siteUrl = env.siteUrl
 	const canonicalUrl = `${siteUrl}/creators/${creator.slug}`
@@ -214,6 +236,7 @@ export default async function CreatorProfilePage({ params }: PageProps) {
 				reviews={reviews}
 				averageRating={averageRating}
 				totalReviews={totalCount}
+				moderationActions={moderationActions}
 			/>
 		</>
 	)

@@ -66,6 +66,7 @@ interface CreatorPublicProfileProps {
 	isCompact?: boolean
 	saveButton?: React.ReactNode
 	contactButton?: React.ReactNode
+	moderationActions?: React.ReactNode
 	reviews?: ReviewData[]
 	averageRating?: number | null
 	totalReviews?: number
@@ -93,6 +94,7 @@ export async function CreatorPublicProfile({
 	isCompact,
 	saveButton,
 	contactButton,
+	moderationActions,
 	reviews = [],
 	averageRating = null,
 	totalReviews = 0,
@@ -241,6 +243,7 @@ export async function CreatorPublicProfile({
 									</Button>
 								)}
 								{saveButton}
+								{moderationActions}
 							</div>
 						</div>
 					</div>

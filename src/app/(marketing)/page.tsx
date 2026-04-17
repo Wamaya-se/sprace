@@ -58,13 +58,14 @@ async function getTopCreators(): Promise<LandingCreator[]> {
 			display_name,
 			followers_count,
 			slug,
-			profile:profiles!creators_profile_id_fkey(avatar_url),
+			profile:profiles!creators_profile_id_fkey!inner(avatar_url, is_suspended),
 			specialties:creator_specialties(
 				specialty:specialties(name)
 			)
 		`,
 		)
 		.eq('status', 'active')
+		.eq('profile.is_suspended', false)
 		.not('slug', 'is', null)
 		.order('followers_count', { ascending: false })
 		.limit(12)

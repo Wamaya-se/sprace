@@ -14,6 +14,7 @@ const pageTitleKeys: Record<string, string> = {
 	'/admin/settings': 'platformSettings',
 	'/admin/disputes': 'disputes',
 	'/admin/content': 'contentManagement',
+	'/admin/reports': 'moderation',
 }
 
 export function AdminHeader() {

@@ -830,8 +830,12 @@ export type Database = {
           email_notifications: boolean
           full_name: string | null
           id: string
+          is_suspended: boolean
           preferred_locale: string
           role: Database["public"]["Enums"]["user_role"]
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
           tos_accepted_at: string | null
           tos_version: string | null
           updated_at: string
@@ -843,8 +847,12 @@ export type Database = {
           email_notifications?: boolean
           full_name?: string | null
           id: string
+          is_suspended?: boolean
           preferred_locale?: string
           role?: Database["public"]["Enums"]["user_role"]
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           tos_accepted_at?: string | null
           tos_version?: string | null
           updated_at?: string
@@ -856,13 +864,121 @@ export type Database = {
           email_notifications?: boolean
           full_name?: string | null
           id?: string
+          is_suspended?: boolean
           preferred_locale?: string
           role?: Database["public"]["Enums"]["user_role"]
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           tos_accepted_at?: string | null
           tos_version?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_suspended_by_fkey"
+            columns: ["suspended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          admin_note: string | null
+          category: Database["public"]["Enums"]["report_category"]
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          category: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          category?: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -1113,6 +1229,7 @@ export type Database = {
       }
       search_creators: {
         Args: {
+          p_blocked_profile_ids?: string[]
           p_limit?: number
           p_market_slugs?: string[]
           p_max_rate?: number
@@ -1184,12 +1301,22 @@ export type Database = {
         | "delivery_approved"
         | "dispute_opened"
         | "dispute_resolved"
+        | "report_resolved"
+        | "account_suspended"
       payment_status:
         | "pending"
         | "captured"
         | "transferred"
         | "refunded"
         | "failed"
+      report_category:
+        | "spam"
+        | "fraud"
+        | "harassment"
+        | "inappropriate"
+        | "other"
+      report_status: "pending" | "reviewing" | "resolved" | "dismissed"
+      report_target_type: "profile" | "booking"
       user_role: "creator" | "business" | "admin"
     }
     CompositeTypes: {

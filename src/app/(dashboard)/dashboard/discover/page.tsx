@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CreatorCard } from '@/components/dashboard/creator-card'
 import { CreatorFilters } from '@/components/dashboard/creator-filters'
 import { getSavedCreatorIds } from '@/lib/queries/saved-creators'
+import { getBlockedProfileIds } from '@/lib/queries/blocks'
 import type { CreatorCardData } from '@/components/dashboard/creator-card'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,6 +43,7 @@ async function getCreators(filters: {
 	markets?: string[]
 	minRate?: number
 	maxRate?: number
+	blockedProfileIds?: string[]
 }): Promise<CreatorCardData[]> {
 	const supabase = await createClient()
 
@@ -59,6 +61,10 @@ async function getCreators(filters: {
 		p_max_rate: filters.maxRate,
 		p_limit: 48,
 		p_offset: 0,
+		p_blocked_profile_ids:
+			filters.blockedProfileIds && filters.blockedProfileIds.length > 0
+				? filters.blockedProfileIds
+				: undefined,
 	})
 
 	if (error) {
@@ -115,6 +121,8 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
 	const minRate = params.minRate ? Number(params.minRate) : undefined
 	const maxRate = params.maxRate ? Number(params.maxRate) : undefined
 
+	const blockedProfileIds = await getBlockedProfileIds()
+
 	const [filterOptions, creators, savedIds] = await Promise.all([
 		getFilterOptions(),
 		getCreators({
@@ -123,6 +131,7 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
 			markets: marketFilters.length > 0 ? marketFilters : undefined,
 			minRate: minRate && !isNaN(minRate) ? minRate : undefined,
 			maxRate: maxRate && !isNaN(maxRate) ? maxRate : undefined,
+			blockedProfileIds,
 		}),
 		getSavedCreatorIds(),
 	])

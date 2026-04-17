@@ -134,6 +134,7 @@ export async function createService(
 8. **Validate foreign key ownership** — when a mutation accepts a reference ID (e.g. `serviceId` on a booking), verify the referenced row belongs to the expected owner (e.g. service belongs to selected creator and is active). FK constraints prevent invalid IDs but not wrong-owner IDs.
 9. **HTML ↔ Zod alignment** — HTML input attributes (`min`, `max`, `type`) must match Zod constraints. Use `z.string().date()` for date inputs, `z.coerce.number().positive()` with `min={1}` not `min={0}`.
 10. **Multi-step mutations** — when an action performs multiple inserts (booking + conversation + message), log secondary failures but return success for the primary. Design the read path to self-heal missing secondary data.
+11. **Testable Zod schemas** — `'use server'` files cannot be imported in Vitest (Next.js injects `server-only`). Put reusable Zod schemas under `src/lib/validation/*.ts` and import them into both the Server Action and the test file. Keep the action file focused on orchestration (auth, rate limit, DB).
 
 ### Admin action template
 

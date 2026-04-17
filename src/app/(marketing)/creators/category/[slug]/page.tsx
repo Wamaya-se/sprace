@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { JsonLd } from '@/components/shared/json-ld'
 import { getOrganizationJsonLd } from '@/lib/seo/organization'
+import { getBlockedProfileIds } from '@/lib/queries/blocks'
 
 export const revalidate = 300
 
@@ -54,13 +55,15 @@ async function _getCreatorsForSpecialty(specialtyId: string) {
 		.select(
 			`
 			id,
+			profile_id,
 			display_name,
 			bio,
 			hourly_rate,
 			followers_count,
 			slug,
-			profile:profiles!creators_profile_id_fkey (
-				avatar_url
+			profile:profiles!creators_profile_id_fkey!inner (
+				avatar_url,
+				is_suspended
 			),
 			specialties:creator_specialties (
 				specialty:specialties (
@@ -73,6 +76,7 @@ async function _getCreatorsForSpecialty(specialtyId: string) {
 		)
 		.in('id', creatorIds)
 		.eq('status', 'active')
+		.eq('profile.is_suspended', false)
 		.not('slug', 'is', null)
 		.order('followers_count', { ascending: false })
 
@@ -80,6 +84,7 @@ async function _getCreatorsForSpecialty(specialtyId: string) {
 
 	return creators.map((c) => ({
 		id: c.id,
+		profile_id: c.profile_id,
 		display_name: c.display_name,
 		bio: c.bio,
 		hourly_rate: c.hourly_rate,
@@ -156,10 +161,13 @@ export default async function CategoryPage({ params }: PageProps) {
 		return <CategoryNotFound />
 	}
 
-	const [creators, organization] = await Promise.all([
+	const [allCreators, organization, blockedIds] = await Promise.all([
 		getCreatorsForSpecialty(specialty.id),
 		getOrganizationJsonLd(),
+		getBlockedProfileIds(),
 	])
+	const blockedSet = new Set(blockedIds)
+	const creators = allCreators.filter((c) => !blockedSet.has(c.profile_id))
 	const siteUrl = env.siteUrl
 
 	const jsonLd = {

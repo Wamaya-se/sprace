@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { UserActions } from './components/user-actions'
+import { SuspensionActions } from './components/suspension-actions'
 import {
 	BusinessVerificationPanel,
 	type BusinessVerificationData,
@@ -42,7 +43,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 	const { data: profile } = await supabase
 		.from('profiles')
 		.select(
-			'id, full_name, email, role, avatar_url, preferred_locale, created_at',
+			'id, full_name, email, role, avatar_url, preferred_locale, created_at, is_suspended, suspended_at, suspension_reason',
 		)
 		.eq('id', id)
 		.single()
@@ -228,6 +229,11 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 					{creatorData && (
 						<Badge variant={statusBadgeVariant[creatorData.status]}>
 							{statusLabel[creatorData.status]}
+						</Badge>
+					)}
+					{profile.is_suspended && (
+						<Badge variant="outline" className="text-destructive">
+							{t('suspendedBadge') || 'Suspended'}
 						</Badge>
 					)}
 				</div>
@@ -474,6 +480,24 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 						creatorStatus={creatorData?.status}
 						isSelf={isSelf}
 					/>
+					{!isSelf && profile.role !== 'admin' && (
+						<div className="mt-6 border-t border-outline-variant/20 pt-6">
+							{profile.is_suspended && profile.suspension_reason && (
+								<div className="mb-4 rounded-lg bg-surface-container-low p-3">
+									<span className="font-sans text-xs font-medium text-muted-foreground">
+										{t('suspensionReasonLabel')}
+									</span>
+									<p className="mt-0.5 whitespace-pre-wrap font-sans text-sm leading-[1.7] text-foreground/70">
+										{profile.suspension_reason}
+									</p>
+								</div>
+							)}
+							<SuspensionActions
+								userId={profile.id}
+								isSuspended={profile.is_suspended}
+							/>
+						</div>
+					)}
 					{businessVerification && (
 						<BusinessVerificationPanel data={businessVerification} />
 					)}
