@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.4"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -388,6 +383,47 @@ export type Database = {
           },
         ]
       }
+      delivery_files: {
+        Row: {
+          created_at: string
+          delivery_id: string
+          file_name: string
+          file_size: number
+          file_url: string
+          id: string
+          mime_type: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          delivery_id: string
+          file_name: string
+          file_size: number
+          file_url: string
+          id?: string
+          mime_type: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          delivery_id?: string
+          file_name?: string
+          file_size?: number
+          file_url?: string
+          id?: string
+          mime_type?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_files_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "booking_deliveries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disputes: {
         Row: {
           admin_note: string | null
@@ -445,47 +481,6 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      delivery_files: {
-        Row: {
-          created_at: string
-          delivery_id: string
-          file_name: string
-          file_size: number
-          file_url: string
-          id: string
-          mime_type: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          delivery_id: string
-          file_name: string
-          file_size: number
-          file_url: string
-          id?: string
-          mime_type: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          delivery_id?: string
-          file_name?: string
-          file_size?: number
-          file_url?: string
-          id?: string
-          mime_type?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_files_delivery_id_fkey"
-            columns: ["delivery_id"]
-            isOneToOne: false
-            referencedRelation: "booking_deliveries"
             referencedColumns: ["id"]
           },
         ]
@@ -954,72 +949,66 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: { Args: never; Returns: boolean }
-      assign_receipt_number: {
-        Args: { p_payment_id: string }
-        Returns: string
-      }
       assign_payout_statement_number: {
         Args: { p_payment_id: string }
         Returns: string
       }
+      assign_receipt_number: { Args: { p_payment_id: string }; Returns: string }
       get_user_conversations_with_last_message: {
         Args: never
-        Returns: Array<{
+        Returns: {
+          booking_id: string
           id: string
-          booking_id: string | null
           last_message_at: string
-          other_participant_id: string | null
-          other_participant_full_name: string | null
-          other_participant_avatar_url: string | null
-          last_message_content: string | null
-          last_message_sender_id: string | null
-          last_message_is_system: boolean | null
-          last_message_created_at: string | null
+          last_message_content: string
+          last_message_created_at: string
+          last_message_is_system: boolean
+          last_message_sender_id: string
+          other_participant_avatar_url: string
+          other_participant_full_name: string
+          other_participant_id: string
           unread_count: number
-        }>
+        }[]
       }
+      is_admin: { Args: never; Returns: boolean }
       mark_messages_read: {
         Args: { p_conversation_id: string }
         Returns: undefined
       }
-      search_creators: {
-        Args: {
-          p_q?: string | null
-          p_specialty_slugs?: string[] | null
-          p_market_slugs?: string[] | null
-          p_min_rate?: number | null
-          p_max_rate?: number | null
-          p_limit?: number | null
-          p_offset?: number | null
-        }
-        Returns: Array<{
-          id: string
-          profile_id: string
-          display_name: string
-          bio: string | null
-          hourly_rate: number | null
-          followers_count: number | null
-          slug: string
-          avatar_url: string | null
-          specialties: Array<{ id: string; name: string; slug: string }>
-          markets: Array<{
-            id: string
-            name: string
-            slug: string
-            flag_emoji: string | null
-          }>
-          average_rating: number | null
-          total_reviews: number
-        }>
-      }
       public_landing_stats: {
-        Args: Record<string, never>
+        Args: never
         Returns: {
           active_creators: number
           completed_bookings: number
         }[]
       }
+      search_creators: {
+        Args: {
+          p_limit?: number
+          p_market_slugs?: string[]
+          p_max_rate?: number
+          p_min_rate?: number
+          p_offset?: number
+          p_q?: string
+          p_specialty_slugs?: string[]
+        }
+        Returns: {
+          avatar_url: string
+          average_rating: number
+          bio: string
+          display_name: string
+          followers_count: number
+          hourly_rate: number
+          id: string
+          markets: Json
+          profile_id: string
+          slug: string
+          specialties: Json
+          total_reviews: number
+        }[]
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       booking_status:
@@ -1251,3 +1240,4 @@ export const Constants = {
     },
   },
 } as const
+

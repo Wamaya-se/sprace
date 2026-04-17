@@ -46,15 +46,17 @@ async function getCreators(filters: {
 	const supabase = await createClient()
 
 	const { data, error } = await supabase.rpc('search_creators', {
-		p_q: filters.q ?? null,
+		p_q: filters.q,
 		p_specialty_slugs:
 			filters.specialties && filters.specialties.length > 0
 				? filters.specialties
-				: null,
+				: undefined,
 		p_market_slugs:
-			filters.markets && filters.markets.length > 0 ? filters.markets : null,
-		p_min_rate: filters.minRate ?? null,
-		p_max_rate: filters.maxRate ?? null,
+			filters.markets && filters.markets.length > 0
+				? filters.markets
+				: undefined,
+		p_min_rate: filters.minRate,
+		p_max_rate: filters.maxRate,
 		p_limit: 48,
 		p_offset: 0,
 	})
@@ -72,8 +74,8 @@ async function getCreators(filters: {
 		followers_count: c.followers_count,
 		slug: c.slug,
 		avatar_url: c.avatar_url,
-		specialties: c.specialties ?? [],
-		markets: c.markets ?? [],
+		specialties: (c.specialties as CreatorCardData['specialties'] | null) ?? [],
+		markets: (c.markets as CreatorCardData['markets'] | null) ?? [],
 		averageRating: c.average_rating,
 		totalReviews: Number(c.total_reviews ?? 0),
 	}))
