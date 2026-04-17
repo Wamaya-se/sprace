@@ -350,14 +350,17 @@ _Konvertera besökare till användare — separata flows för kreatörer och fö
 - [x] Process hardening: "Definition of Done" added to `.cursorrules` + `CLAUDE.md` making `quality-review` mandatory before a sprint can be marked complete; `quality-review` skill header updated to reflect non-negotiable status
 - [x] Verified: `npm run typecheck` clean, `npm run lint` 0/0, `npm run test:run` 58/58 passing
 
-### 7c. Trust & SEO-sidor
+### 7c. Trust & SEO-sidor ✅
 
-- [ ] `/about` — Om Sprace, team, vision
-- [ ] `/contact` — Kontaktformulär (skickar till admin e-post)
-- [ ] `/terms` — Användarvillkor
-- [ ] `/privacy` — Integritetspolicy (samordnas med GDPR-paketet i Fas 6d)
-- [ ] Blogg-sektion (`/blog`) — SEO-drivet innehåll (kan vara statisk MDX initialt)
-- [ ] JSON-LD på alla publika sidor (Organization, FAQPage, Service)
+- [x] `/about` — Mission, värderingar, berättelse, stats, CTA. Full SEO (metadata + OG + canonical) + Organization + BreadcrumbList JSON-LD.
+- [x] `/contact` — Kontaktformulär (namn, email, ämne-enum, meddelande + honeypot), Zod-validerad Server Action `submitContactForm`, rate-limitad (`auth`-budget, IP+email), skickar till `platform_settings.platform_billing_email` via Resend, i18n fel-keys. Kontakt-sidebar (email, adress från `platform_settings`, svarstider). Organization + ContactPage + BreadcrumbList JSON-LD.
+- [x] `/terms` + `/privacy` — redan klara (Fas 6d); Organization JSON-LD tillagt.
+- [x] Blogg (`/blog` + `/blog/[slug]`) — filsystem-baserad, markdown med frontmatter via `gray-matter` + `marked` (`content/blog/*.md`). `getAllBlogPosts()` / `getBlogPost()` i `src/lib/blog/posts.ts`, `renderMarkdown()` i `render.ts`. Index: kort-grid med cover, taggar, datum, läsminuter. Detalj: artikel med `.prose-sprace` typografi (custom CSS i globals.css), breadcrumb, CTA. `generateStaticParams` från filnamn. Starter-inlägg `welcome-to-sprace.md`. Loading skeleton.
+- [x] JSON-LD på alla publika sidor via ny shared `JsonLd`-komponent (`src/components/shared/json-ld.tsx`) + `getOrganizationJsonLd()` i `src/lib/seo/organization.ts` (läser legal-entity från `platform_settings`, inkl. Organization `@id`, address, sameAs, contactPoint, orgnummer/VAT som PropertyValue). Wired into home, about, contact, blog, blog-post, for-creators, for-businesses, how-it-works, pricing, creators (index + category + profile), terms, privacy.
+- [x] Sitemap uppdaterad: `/about`, `/contact`, `/blog` + alla blogginlägg via `getAllBlogPosts()`.
+- [x] Footer: lade till `/blog`-länk i company-sektionen.
+- [x] i18n: `about`, `contactPage`, `blog` namespaces + metadata-keys (aboutTitle/Description, contactTitle/Description, blogTitle/Description) + `footer.blog` + `errors.contactEmailFailed`.
+- [x] Verified: `npm run typecheck` clean, `npm run lint` 0/0, `npm run test:run` 86/86 passing.
 
 ### 7d. Navigation & UX
 

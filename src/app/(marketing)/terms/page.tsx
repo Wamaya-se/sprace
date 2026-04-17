@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { JsonLd } from '@/components/shared/json-ld'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('metadata')
@@ -14,10 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TermsPage() {
-	const t = await getTranslations('legal')
+	const [t, organization] = await Promise.all([
+		getTranslations('legal'),
+		getOrganizationJsonLd(),
+	])
 
 	return (
 		<div className="mx-auto max-w-3xl px-6 py-16 lg:py-24">
+			<JsonLd data={organization} />
 			<h1 className="font-heading text-3xl font-bold tracking-[-0.03em] text-foreground lg:text-4xl">
 				{t('termsTitle')}
 			</h1>

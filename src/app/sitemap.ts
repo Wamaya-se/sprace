@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { getAllBlogPosts } from '@/lib/blog/posts'
 import { createClient } from '@/lib/supabase/server'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://sprace.com'
@@ -60,6 +61,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.8,
 		},
 		{
+			url: `${BASE_URL}/about`,
+			lastModified: new Date(),
+			changeFrequency: 'monthly',
+			priority: 0.7,
+		},
+		{
+			url: `${BASE_URL}/contact`,
+			lastModified: new Date(),
+			changeFrequency: 'monthly',
+			priority: 0.6,
+		},
+		{
+			url: `${BASE_URL}/blog`,
+			lastModified: new Date(),
+			changeFrequency: 'weekly',
+			priority: 0.7,
+		},
+		{
 			url: `${BASE_URL}/privacy`,
 			lastModified: new Date(),
 			changeFrequency: 'monthly',
@@ -111,5 +130,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		}),
 	)
 
-	return [...staticPages, ...categoryIndex, ...categoryPages, ...creatorPages]
+	const posts = await getAllBlogPosts()
+	const blogPages: MetadataRoute.Sitemap = posts.map((p) => ({
+		url: `${BASE_URL}/blog/${p.slug}`,
+		lastModified: new Date(p.date),
+		changeFrequency: 'monthly' as const,
+		priority: 0.6,
+	}))
+
+	return [
+		...staticPages,
+		...categoryIndex,
+		...categoryPages,
+		...creatorPages,
+		...blogPages,
+	]
 }

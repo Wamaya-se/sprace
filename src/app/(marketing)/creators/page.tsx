@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { env } from '@/lib/env'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { JsonLd } from '@/components/shared/json-ld'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 export const revalidate = 300
 
@@ -67,7 +69,10 @@ const getCategoriesWithCounts = unstable_cache(
 
 export default async function CreatorCategoriesPage() {
 	const t = await getTranslations('categories')
-	const categories = await getCategoriesWithCounts()
+	const [categories, organization] = await Promise.all([
+		getCategoriesWithCounts(),
+		getOrganizationJsonLd(),
+	])
 	const siteUrl = env.siteUrl
 
 	const jsonLd = {
@@ -99,14 +104,9 @@ export default async function CreatorCategoriesPage() {
 
 	return (
 		<>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-			/>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-			/>
+			<JsonLd data={organization} />
+			<JsonLd data={jsonLd} />
+			<JsonLd data={breadcrumbJsonLd} />
 
 			<section className="relative overflow-hidden pt-16">
 				<div className="grain absolute inset-0 bg-gradient-to-br from-gradient-start via-surface to-gradient-end" />

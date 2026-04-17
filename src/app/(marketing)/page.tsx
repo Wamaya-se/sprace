@@ -3,11 +3,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { FAQSection } from '@/components/shared/faq-section'
+import { JsonLd } from '@/components/shared/json-ld'
 import { ScrollReveal } from '@/components/shared/scroll-reveal'
 import { SocialProofSection } from '@/components/shared/social-proof-section'
 import { TestimonialsSection } from '@/components/shared/testimonials-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 import { createClient } from '@/lib/supabase/server'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -122,7 +124,10 @@ export default async function HomePage() {
 	const tFaq = await getTranslations('faq')
 	const tCta = await getTranslations('cta')
 	const tCommon = await getTranslations('common')
-	const creators = await getTopCreators()
+	const [creators, organization] = await Promise.all([
+		getTopCreators(),
+		getOrganizationJsonLd(),
+	])
 
 	const faqKeys = ['1', '2', '3', '4', '5', '6', '7'] as const
 	const faqJsonLd = {
@@ -315,10 +320,8 @@ export default async function HomePage() {
 				</ScrollReveal>
 			</section>
 
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-			/>
+			<JsonLd data={organization} />
+			<JsonLd data={faqJsonLd} />
 		</>
 	)
 }

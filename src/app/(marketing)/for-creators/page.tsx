@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
+import { JsonLd } from '@/components/shared/json-ld'
 import { ScrollReveal } from '@/components/shared/scroll-reveal'
 import { TestimonialsSection } from '@/components/shared/testimonials-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('metadata')
@@ -29,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ForCreatorsPage() {
 	const t = await getTranslations('forCreators')
+	const organization = await getOrganizationJsonLd()
 
 	const benefits = [
 		{ title: t('benefit1Title'), body: t('benefit1Body') },
@@ -67,6 +70,7 @@ export default async function ForCreatorsPage() {
 
 	return (
 		<>
+			<JsonLd data={organization} />
 			{/* Hero */}
 			<section className="relative flex items-center overflow-hidden pt-32 pb-24">
 				<div className="grain absolute inset-0 bg-gradient-to-br from-gradient-start via-surface to-gradient-end" />

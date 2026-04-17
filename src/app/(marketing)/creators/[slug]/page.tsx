@@ -6,7 +6,9 @@ import { createClient } from '@/lib/supabase/server'
 import { env } from '@/lib/env'
 import { Button } from '@/components/ui/button'
 import { CreatorPublicProfile } from '@/components/shared/creator-public-profile'
+import { JsonLd } from '@/components/shared/json-ld'
 import { getCreatorReviews } from '@/lib/queries/reviews'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 interface PageProps {
 	params: Promise<{ slug: string }>
@@ -157,9 +159,11 @@ export default async function CreatorProfilePage({ params }: PageProps) {
 		return <CreatorNotFound />
 	}
 
-	const { reviews, averageRating, totalCount } = await getCreatorReviews(
-		creator.profile_id,
-	)
+	const [reviewData, organization] = await Promise.all([
+		getCreatorReviews(creator.profile_id),
+		getOrganizationJsonLd(),
+	])
+	const { reviews, averageRating, totalCount } = reviewData
 
 	const siteUrl = env.siteUrl
 	const canonicalUrl = `${siteUrl}/creators/${creator.slug}`
@@ -202,14 +206,9 @@ export default async function CreatorProfilePage({ params }: PageProps) {
 
 	return (
 		<>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-			/>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-			/>
+			<JsonLd data={organization} />
+			<JsonLd data={jsonLd} />
+			<JsonLd data={breadcrumbJsonLd} />
 			<CreatorPublicProfile
 				creator={creator}
 				reviews={reviews}

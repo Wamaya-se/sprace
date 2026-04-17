@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
+import { JsonLd } from '@/components/shared/json-ld'
 import { ScrollReveal } from '@/components/shared/scroll-reveal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('metadata')
@@ -29,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HowItWorksPage() {
 	const t = await getTranslations('howItWorksPage')
+	const organization = await getOrganizationJsonLd()
 
 	const creatorSteps = [
 		{ title: t('creatorStep1Title'), body: t('creatorStep1Body') },
@@ -76,10 +79,8 @@ export default async function HowItWorksPage() {
 
 	return (
 		<>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
-			/>
+			<JsonLd data={organization} />
+			<JsonLd data={howToJsonLd} />
 			{/* Hero */}
 			<section className="relative overflow-hidden pt-32 pb-20">
 				<div className="grain absolute inset-0 bg-gradient-to-br from-gradient-start via-surface to-gradient-end" />

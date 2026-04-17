@@ -277,3 +277,114 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
 	pointer-events: none;
 	mix-blend-mode: overlay;
 }
+
+/* Long-form content styling for blog posts / markdown-rendered output. */
+.prose-sprace {
+	max-width: 100%;
+}
+
+.prose-sprace > * + * {
+	margin-top: 1.25rem;
+}
+
+.prose-sprace h2 {
+	margin-top: 2.5rem;
+	font-family: var(--font-heading);
+	font-size: 1.5rem;
+	font-weight: 600;
+	letter-spacing: -0.03em;
+	color: var(--foreground);
+	line-height: 1.3;
+}
+
+.prose-sprace h3 {
+	margin-top: 2rem;
+	font-family: var(--font-heading);
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: -0.03em;
+	color: var(--foreground);
+	line-height: 1.35;
+}
+
+.prose-sprace p {
+	color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
+
+.prose-sprace a {
+	color: var(--brand);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	border-radius: 2px;
+}
+
+.prose-sprace a:hover {
+	opacity: 0.8;
+}
+
+.prose-sprace a:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px color-mix(in oklab, var(--tertiary) 50%, transparent);
+}
+
+.prose-sprace ul,
+.prose-sprace ol {
+	padding-left: 1.5rem;
+	color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
+
+.prose-sprace ul {
+	list-style: disc;
+}
+
+.prose-sprace ol {
+	list-style: decimal;
+}
+
+.prose-sprace li + li {
+	margin-top: 0.5rem;
+}
+
+.prose-sprace blockquote {
+	border-left: 3px solid var(--brand);
+	padding-left: 1rem;
+	font-style: italic;
+	color: var(--muted-foreground);
+}
+
+.prose-sprace code {
+	background: var(--surface-container);
+	padding: 0.15rem 0.35rem;
+	border-radius: 0.25rem;
+	font-family: var(--font-mono);
+	font-size: 0.9em;
+}
+
+.prose-sprace pre {
+	background: var(--surface-container);
+	padding: 1rem;
+	border-radius: 0.75rem;
+	overflow-x: auto;
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	line-height: 1.6;
+}
+
+.prose-sprace pre code {
+	background: transparent;
+	padding: 0;
+}
+
+.prose-sprace hr {
+	border: none;
+	border-top: 1px solid
+		color-mix(in oklab, var(--outline-variant) 20%, transparent);
+	margin: 2.5rem 0;
+}
+
+.prose-sprace img {
+	border-radius: 0.75rem;
+	width: 100%;
+	height: auto;
+}

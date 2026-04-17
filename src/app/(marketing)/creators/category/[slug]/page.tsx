@@ -9,6 +9,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { JsonLd } from '@/components/shared/json-ld'
+import { getOrganizationJsonLd } from '@/lib/seo/organization'
 
 export const revalidate = 300
 
@@ -154,7 +156,10 @@ export default async function CategoryPage({ params }: PageProps) {
 		return <CategoryNotFound />
 	}
 
-	const creators = await getCreatorsForSpecialty(specialty.id)
+	const [creators, organization] = await Promise.all([
+		getCreatorsForSpecialty(specialty.id),
+		getOrganizationJsonLd(),
+	])
 	const siteUrl = env.siteUrl
 
 	const jsonLd = {
@@ -193,14 +198,9 @@ export default async function CategoryPage({ params }: PageProps) {
 
 	return (
 		<>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-			/>
-			<script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-			/>
+			<JsonLd data={organization} />
+			<JsonLd data={jsonLd} />
+			<JsonLd data={breadcrumbJsonLd} />
 
 			<section className="relative overflow-hidden pt-16">
 				<div className="grain absolute inset-0 bg-gradient-to-br from-gradient-start via-surface to-gradient-end" />
