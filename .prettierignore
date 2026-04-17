@@ -1,0 +1,23 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated
+src/types/supabase.ts
+
+# Supabase internals
+supabase/.temp
+supabase/.branches
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Docs with intentional formatting
+brand_assets/DESIGN.md

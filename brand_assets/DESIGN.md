@@ -14,7 +14,19 @@ We achieve this through **The Luminescent Editorial** approach:
 
 ## 2. Colors & Surface Logic
 
-The palette is anchored in a sophisticated "Void" (`surface: #0e0e0e`), allowing the vibrant accents to feel like light sources rather than just flat UI elements.
+The palette supports both **dark** (default) and **light** themes via CSS variables in `globals.css`. All color references use theme-aware tokens (`text-foreground`, `bg-surface-dim`, `text-muted-foreground`, etc.) — never hardcoded hex or `text-white`/`bg-black`.
+
+### Dark theme (default)
+The dark palette is anchored in a sophisticated "Void" (`surface: #0e0e0e`), allowing the vibrant accents to feel like light sources rather than just flat UI elements.
+
+### Light theme
+The light palette inverts surfaces to a clean white hierarchy (`#fafafa` → `#f5f5f5` → `#f0f0f0` → `#e8e8e8` → `#e0e0e0`), with dark foreground text (`#1a1a1a`) and adapted brand accents (`#e0577a`). Gradients on marketing/hero sections use softer tones (`#fce4ec` → `#ede9fe`).
+
+### Theme infrastructure
+- **`next-themes`** with `attribute="class"`, `defaultTheme="dark"`, `enableSystem`
+- **ThemeProvider** wraps the root layout in `src/components/shared/theme-provider.tsx`
+- **ThemeToggle** component cycles light → dark → system (in navbar + dashboard/admin headers)
+- **CSS variables** defined in `:root` (light) and `.dark` (dark) blocks in `globals.css`
 
 ### The "No-Line" Rule
 **Explicit Instruction:** Do not use 1px solid borders to define sections or containers.
@@ -124,6 +136,30 @@ Use intentional, consistent spacing tokens—not arbitrary Tailwind steps. If sp
 * **Don't use Standard Drop Shadows:** Avoid "dirty" grey shadows. Always tint them with the background color.
 * **Don't use Divider Lines:** If you feel the need for a divider, increase your `Spacing` scale instead. Use `Spacing: 8` (2.75rem) to separate major content groups.
 * **Don't mix Typefaces:** Stick strictly to Epilogue for headers and Manrope for body. Mixing more fonts dilutes the brand authority.
+
+---
+
+## 10. Shadcn/UI Component Mapping
+
+All UI primitives are built as **Shadcn/UI components** in `src/components/ui/`. Each component's variants are pre-configured to match this design system. Never override variant styles via `className` — add a new variant instead.
+
+| Component | Variants | Maps to |
+|-----------|----------|---------|
+| **Button** | `brand` (gradient CTA), `secondary` (surface bg + brand text), `ghost` (transparent), `chip` (secondary_container), `outline` (ghost border), `destructive`, `link` | Section 5: Buttons |
+| **Input** | Single style: `bg-surface-dim`, ghost border, tertiary focus | Section 5: Input Fields |
+| **Card** | No border, `surface-container-high` bg, `rounded-xl` | Section 5: Cards |
+| **Label** | `text-foreground/70`, `font-sans` | Body typography |
+| **Avatar** | `surface-container-highest` bg, brand-colored fallback | Surface hierarchy |
+| **Separator** | `outline-variant/20` | The "Ghost Border" applied horizontally |
+
+### Typography aliases
+
+| Tailwind class | Font | Usage |
+|----------------|------|-------|
+| `font-heading` | Epilogue | All headings, display text |
+| `font-sans` | Manrope | Body, labels, UI text |
+
+Never use the verbose arbitrary font syntax. Always use the short aliases.
 
 ---
 **Director's Note:** Every pixel should feel like it was placed with a purpose. If a layout feels too "safe," increase the typography contrast and remove more lines. Let the colors and the space do the work.

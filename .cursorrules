@@ -2,22 +2,77 @@
 
 Influencer/UGC marketplace connecting creators with brands.
 
-## Required reading before writing code
+## Required reading at session start
 
-1. `TECHSTACK.md` — Decided stack, versions, project structure. Do not deviate.
-2. `brand_assets/DESIGN.md` — Design system: "The Luminescent Editorial". All UI must follow it.
+1. `ROADMAP.md` — Project status, current sprint, completed work. Update after completing work.
+2. `TECHSTACK.md` — Decided stack, versions, project structure. Do not deviate.
+3. `brand_assets/DESIGN.md` — Design system. All UI must follow it.
+
+## Token efficiency
+
+- Read only relevant sections of docs, not entire files unnecessarily.
+- Keep code comments minimal — code should be self-documenting.
+- Invoke only the skill relevant to the current task.
+- Update ROADMAP.md at session end, not after every small change.
 3. `.cursor/skills/` — Invoke the relevant skill before writing code:
    - `frontend-design` — Before any UI work
    - `supabase-patterns` — Before database/auth/storage work
    - `component-scaffold` — Before creating new components
+   - `i18n-patterns` — Before writing any user-facing text
+   - `error-handling` — Before building data-fetching pages or form flows
+   - `api-patterns` — Before writing Server Actions, Route Handlers, or data-fetching logic
+   - `quality-review` — After completing any feature/page/refactor. Final quality gate.
 
 ## Core constraints
 
 - Next.js 16.2 App Router + TypeScript
 - Tailwind CSS v4 via @tailwindcss/postcss
+- **Shadcn/UI for all UI primitives** — Button, Input, Card, Label, Avatar, Separator, Textarea, Progress, Badge, Switch, AlertDialog, Skeleton. Never raw HTML. Custom variants in `src/components/ui/` match DESIGN.md. After installing a new Shadcn component (`npx shadcn@latest add <name>`), immediately customize it to match DESIGN.md before using it — reference `input.tsx` for the established pattern (surface-dim bg, ghost border, tertiary focus glow, theme-aware tokens — never `text-white`/`bg-black`). **Caution:** Shadcn install may overwrite existing customized components — always verify with `git diff` after install and restore any reverted customizations.
+- **Button `asChild` + Base UI:** Our Button wraps `@base-ui/react` (not Radix). When `asChild` renders a non-`<button>` element (e.g. `<Link>`), always pass `nativeButton={false}` to suppress the "expected a native `<button>`" warning. This is already handled in `button.tsx` — do not remove it.
 - Supabase for backend (PostgreSQL, Auth, Storage, Edge Functions)
 - Server Components by default — `'use client'` only when required
 - Design tokens from DESIGN.md — never default Tailwind colors
-- Epilogue for headings, Manrope for body — no other fonts
+- **Theme-aware colors only**: `text-foreground` (not `text-white`), `bg-surface-dim` (not `bg-black`), `text-muted-foreground` (not `text-white/50`). All colors resolve via CSS variables for dark/light mode. `next-themes` with `ThemeProvider` in root layout.
+- Typography: `font-heading` (Epilogue) + `font-sans` (Manrope) — never verbose arbitrary font syntax
 - kebab-case files, PascalCase exports
 - Zod for validation, Zustand for client state, TanStack Query for server state
+- All user-facing strings via next-intl (`messages/en.json`) — never hardcoded. `NextIntlClientProvider` wraps root layout.
+
+## Security standards
+
+- Env vars: use `src/lib/env.ts` getters — never `process.env.VAR!`. Exception: `src/lib/supabase/client.ts` must use inline `process.env.NEXT_PUBLIC_*!` because Next.js bundler requires static string access for client-side env replacement.
+- **Lazy SDK initialization**: Server-only SDK clients (Stripe, Resend, etc.) must use lazy singletons (`getStripe()`, `getResend()`) — never instantiate at module scope. Eager initialization crashes if env vars are missing and causes import-chain failures.
+- All Server Actions: Zod validation before processing, return `ActionResult<T>`, never expose raw DB errors. **Never `as string` on `formData.get()`** — always Zod-parse. **All ID params must pass `z.string().uuid()`** before use in queries. **Error strings must be i18n keys** from the `errors` namespace (e.g. `'errors.bookingNotFound'`), never hardcoded English. Client components translate via `useActionError()` hook.
+- **Foreign key ownership validation**: When a mutation accepts a reference ID (e.g. `serviceId`, `bookingId`), verify the referenced row belongs to the expected owner before insert/update — don't rely on FK constraints alone. Example: `serviceId` must belong to the selected `creatorId` and be active.
+- **HTML ↔ Zod alignment**: HTML input attributes (`min`, `max`, `type`, `pattern`) must match Zod schema constraints. Mismatches cause confusing generic errors. Use `z.string().date()` for date inputs.
+- **Multi-step mutations**: When a Server Action performs multiple inserts (e.g. booking + conversation + message), log failures for secondary steps but still return success for the primary. Design the read path to self-heal (e.g. booking detail creates missing conversations on view).
+- File uploads: send files as FormData to Server Actions. Validate size + MIME type server-side, upload to Supabase Storage via server client. Storage path: `{user.id}/{purpose}.{ext}`. Never expose Storage credentials to the client.
+- Open redirect prevention: validate redirect URLs against allowlist
+- OAuth redirectTo: always `${env.siteUrl}/auth/callback` (app's own route, not Supabase's)
+- Role-based routing: always read role from `user.app_metadata.role` (JWT) — never DB queries in middleware, login redirects, or layout guards. Role is set at registration by the `handle_new_user()` trigger and synced on role change via `auth.admin.updateUserById()`.
+- Admin reads/writes: use `createClient()` (anon key) everywhere — RLS `is_admin()` policies grant full admin access. Only use `createAdminClient()` (service-role) for Supabase Auth Admin API calls (`auth.admin.deleteUser()`, `auth.admin.updateUserById()` for role sync). Never import `createAdminClient` in `'use client'` files.
+- Role change sync: when changing a user's role, update both `profiles.role` (DB source of truth) and `app_metadata.role` (JWT) to keep them in sync.
+- RLS admin policies: always use `public.is_admin()` SECURITY DEFINER function — never inline `select from profiles` subqueries in RLS policies on profiles (causes infinite recursion)
+- **Rate limiting**: Auth-sensitive Server Actions (login, register, forgot-password) must call `checkRateLimit('auth', ...)` from `@/lib/rate-limit` with an IP-scoped identifier. Return `errors.tooManyRequests` on rejection. Graceful fail-open when Upstash env vars are missing (local dev).
+- **Webhook fail-closed**: External webhooks (Stripe, etc.) must record idempotency AFTER successful processing (not before), return 500 on any DB write failure so the sender retries, and wrap handling in a top-level try/catch.
+- **Auth guards before logic**: Every Server Action starts with `requireUser()` / `requireAdmin()` from `@/lib/auth/guards`. Never call `supabase.auth.getUser()` manually inside individual actions — the guards dedupe per-request via `React.cache()` and enforce redirect semantics.
+
+## Engineering standards
+
+- **Confirm before coding.** Only start writing code when you are 95% confident that you and the user agree on what to build and the best approach. If there is any ambiguity — about requirements, architecture, trade-offs, or scope — stop and clarify first. It is always cheaper to discuss than to rewrite.
+- **No workarounds.** Always solve problems properly. Diagnose root cause first, then fix it the right way. If stuck, discuss with the user — never patch around an issue just to unblock.
+- **`revalidatePath`/`revalidateTag` only in mutations**: Never call during Server Component rendering (`page.tsx`, `layout.tsx`). Only in Server Actions (form handlers) or Route Handlers. Fire-and-forget side effects called during render (e.g. `markAsRead`) must not revalidate.
+- **Error boundaries required**: `error.tsx` must exist at root (`src/app/error.tsx`) and at each route group level (`(dashboard)/error.tsx`, `(admin)/error.tsx`). Use `useTranslations('common')` for error text.
+- **Avoid N+1 queries**: Never query inside a loop. Batch with `Promise.all` + `.in()` and join results with `Map`. Use Supabase joins where possible. For multi-table aggregates (inbox-with-last-message, filtered-creator-search), prefer a `SECURITY INVOKER` RPC over many round-trips.
+- **No string-interpolated PostgREST subqueries**: Never embed SQL subqueries in `.or()` or `.filter()` strings. Use `participantOrFilter` + `assertUuid` from `@/lib/db/filters`.
+- **Unique constraints on pair-based data**: For tables with participant pairs (conversations), use a LEAST/GREATEST unique index to prevent duplicates regardless of column order. Handle `23505` (unique violation) gracefully in code.
+- **Read/write separation**: Read-only loaders live in `src/lib/queries/*.ts` (`import 'server-only'`). Server Actions in `src/lib/actions/*.ts` are for mutations. Actions may re-export types from queries, and may wrap a query in a thin Server Action when a client component needs to invoke a read.
+- **Pure helpers stay pure**: Never put state machines, Zod schemas, or role predicates behind `'use server'`/`'server-only'`. Put them in `src/lib/<domain>/*.ts` so they can be unit-tested without Supabase/Next runtime.
+- **Request-scoped dedup**: Wrap data loaders (`getBooking`, `getCurrentUser`, etc.) with `cache()` from React so multiple callers in one request share a single query.
+- **Public-route caching**: Use `unstable_cache(fn, key, { revalidate, tags })` for expensive reads on marketing routes. Invalidate from related admin mutations with `revalidateTag('tag', 'max')` — Next 16 requires the profile argument.
+
+## High-priority cross-cutting concerns
+
+- **SEO**: Every page needs `generateMetadata` with title/description from locale files. Public pages require JSON-LD, Open Graph, hreflang. `sitemap.ts` + `robots.ts` in `src/app/`.
+- **a11y (WCAG 2.1 AA)**: Skip-to-content link, `<main id="main-content">`, one visible h1, keyboard nav, `role="alert"` on errors, `aria-invalid`+`aria-describedby` on fields, `inert`+`aria-expanded` on mobile drawers, `aria-hidden` on decorative SVGs, `prefers-reduced-motion` respected, no `href="#"`. Dashboard/admin pages: the layout header renders the `h1` — page content starts at `h2`.
+- **i18n**: All strings via `useTranslations` (client) / `getTranslations` (server). `generateMetadata` uses translations. DB content: slug → display text in locale files. Client-side validation error messages and `aria-label` values must also use `useTranslations()` — never hardcode user-facing strings in JS logic.
