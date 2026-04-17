@@ -12,19 +12,34 @@ function getResend() {
 	return _resend
 }
 
+interface EmailAttachment {
+	filename: string
+	content: Buffer
+}
+
 interface SendEmailParams {
 	to: string
 	subject: string
 	html: string
+	attachments?: EmailAttachment[]
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
+export async function sendEmail({
+	to,
+	subject,
+	html,
+	attachments,
+}: SendEmailParams) {
 	try {
 		await getResend().emails.send({
 			from: env.emailFromAddress,
 			to,
 			subject,
 			html,
+			attachments: attachments?.map((a) => ({
+				filename: a.filename,
+				content: a.content,
+			})),
 		})
 	} catch (err) {
 		console.error('[sendEmail]', err)
