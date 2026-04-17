@@ -8,6 +8,9 @@ export async function Navbar() {
 	const labels = {
 		creators: t('creators'),
 		howItWorks: t('howItWorks'),
+		forCreators: t('forCreators'),
+		forBusinesses: t('forBusinesses'),
+		pricing: t('pricing'),
 		openMenu: t('openMenu'),
 		closeMenu: t('closeMenu'),
 		login: tc('login'),

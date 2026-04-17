@@ -8,6 +8,18 @@ Influencer/UGC marketplace connecting creators with brands.
 2. `TECHSTACK.md` — Decided stack, versions, project structure. Do not deviate.
 3. `brand_assets/DESIGN.md` — Design system. All UI must follow it.
 
+## Definition of Done (non-negotiable)
+
+A feature, page, sprint, or significant refactor is **not done** until the `quality-review` skill has been run end-to-end on the touched files. This is mandatory — no exceptions:
+
+1. Invoke `.cursor/skills/quality-review/SKILL.md` after the last code change of a sprint or feature.
+2. Work through every section (Security, a11y, SEO, i18n, Code quality, Config, Lessons learned) against the files you touched.
+3. Fix every ❌ before reporting the sprint complete. Surface blockers that need discussion.
+4. Re-run `npm run typecheck`, `npm run lint`, and `npm run test:run` — all must pass.
+5. Update `ROADMAP.md` with completed work plus any rules/skills changes uncovered in section 7 (Lessons learned).
+
+Reporting a sprint as "done" without running the quality review is a process failure. If you realise mid-sprint that a check was skipped, stop and run it before continuing.
+
 ## Token efficiency
 
 - Read only relevant sections of docs, not entire files unnecessarily.

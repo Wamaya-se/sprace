@@ -9,6 +9,9 @@ import { ThemeToggle } from '@/components/shared/theme-toggle'
 interface NavbarLabels {
 	creators: string
 	howItWorks: string
+	forCreators: string
+	forBusinesses: string
+	pricing: string
 	openMenu: string
 	closeMenu: string
 	login: string
@@ -21,8 +24,11 @@ interface NavbarLabels {
 }
 
 const NAV_LINKS = [
-	{ href: '#creators', labelKey: 'creators' as const },
-	{ href: '#how-it-works', labelKey: 'howItWorks' as const },
+	{ href: '/creators', labelKey: 'creators' as const },
+	{ href: '/for-creators', labelKey: 'forCreators' as const },
+	{ href: '/for-businesses', labelKey: 'forBusinesses' as const },
+	{ href: '/how-it-works', labelKey: 'howItWorks' as const },
+	{ href: '/pricing', labelKey: 'pricing' as const },
 ]
 
 export function NavbarClient({ labels }: { labels: NavbarLabels }) {
@@ -90,7 +96,7 @@ export function NavbarClient({ labels }: { labels: NavbarLabels }) {
 						/>
 					</Link>
 
-					<div className="hidden items-center gap-8 font-sans text-sm text-foreground/60 md:flex">
+					<div className="hidden items-center gap-8 font-sans text-sm text-foreground/60 lg:flex">
 						{NAV_LINKS.map((link) => (
 							<Link
 								key={link.href}
@@ -123,7 +129,7 @@ export function NavbarClient({ labels }: { labels: NavbarLabels }) {
 							type="button"
 							variant="ghost"
 							size="icon"
-							className="md:hidden"
+							className="lg:hidden"
 							aria-expanded={open}
 							aria-label={open ? labels.closeMenu : labels.openMenu}
 							onClick={() => setOpen((v) => !v)}
@@ -158,7 +164,7 @@ export function NavbarClient({ labels }: { labels: NavbarLabels }) {
 			{/* Mobile drawer overlay */}
 			{open && (
 				<div
-					className="fixed inset-0 z-40 bg-foreground/60 md:hidden"
+					className="fixed inset-0 z-40 bg-foreground/60 lg:hidden"
 					onClick={closeDrawer}
 					aria-hidden="true"
 				/>
@@ -167,7 +173,7 @@ export function NavbarClient({ labels }: { labels: NavbarLabels }) {
 			{/* Mobile drawer */}
 			<div
 				ref={drawerRef}
-				className={`fixed top-0 right-0 z-50 flex h-full w-72 flex-col bg-surface-container-high transition-transform duration-300 md:hidden ${
+				className={`fixed top-0 right-0 z-50 flex h-full w-72 flex-col bg-surface-container-high transition-transform duration-300 lg:hidden ${
 					open ? 'translate-x-0' : 'translate-x-full'
 				}`}
 				role="dialog"

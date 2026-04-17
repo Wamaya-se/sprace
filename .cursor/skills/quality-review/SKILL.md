@@ -10,7 +10,9 @@ description: >-
 
 ## When to invoke
 
-After completing any feature, page, component, or significant code change. This is the final gate before considering work "done".
+**Mandatory** after every completed sprint, feature, page, component, or significant code change. This is the non-negotiable final gate before work can be reported as "done" — see `.cursorrules` → "Definition of Done" and `CLAUDE.md` → "Definition of Done".
+
+Skipping this step is a process failure. If you notice mid-sprint that a run was skipped, stop and run it before continuing.
 
 ## Checklist
 

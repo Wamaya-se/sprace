@@ -10,8 +10,10 @@ export async function Footer() {
 
 	const platformLinks = [
 		{ href: '/creators', label: tc('creators') },
-		{ href: '/register', label: t('forBusinesses') },
-		{ href: '/register/creator', label: t('forCreators') },
+		{ href: '/for-businesses', label: t('forBusinesses') },
+		{ href: '/for-creators', label: t('forCreators') },
+		{ href: '/how-it-works', label: t('howItWorks') },
+		{ href: '/pricing', label: t('pricing') },
 	]
 
 	const companyLinks = [

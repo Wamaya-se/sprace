@@ -27,7 +27,18 @@ Before writing code, invoke the relevant skill:
 - **`i18n-patterns`** — Before writing any user-facing text. All strings must go through next-intl, never hardcoded in JSX.
 - **`error-handling`** — Before building any page or flow that fetches data or handles user input. Defines error boundaries, loading/empty states, and the `ActionResult` pattern.
 - **`api-patterns`** — Before writing Server Actions, Route Handlers, or data-fetching logic. Covers auth guards, validation, security, caching, and revalidation.
-- **`quality-review`** — After completing a feature, page, or significant refactor. Checklist covering security, a11y, SEO, i18n, and code quality. Run this before considering any work "done".
+- **`quality-review`** — **Mandatory** after every completed sprint, feature, page, or significant refactor. Checklist covering security, a11y, SEO, i18n, and code quality. See "Definition of Done" below.
+
+## Definition of Done
+
+A sprint, feature, page, or significant refactor is **not done** until every item below is true. This is non-negotiable:
+
+1. `quality-review` skill has been run end-to-end against the files touched in this sprint.
+2. Every ❌ from the checklist is fixed (or explicitly surfaced as a blocker for user decision).
+3. `npm run typecheck`, `npm run lint`, and `npm run test:run` all pass.
+4. `ROADMAP.md` is updated with completed work and any rules/skills changes from section 7 (Lessons learned).
+
+Marking work as "complete" without running the quality review is a process failure. If you notice mid-sprint that a checkpoint was skipped, stop and run it before continuing.
 
 ## Reference Images
 

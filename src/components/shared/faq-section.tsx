@@ -2,42 +2,62 @@ import { getTranslations } from 'next-intl/server'
 import { ScrollReveal } from '@/components/shared/scroll-reveal'
 
 interface FaqItem {
+	id?: string
 	question: string
 	answer: string
 }
 
-export async function FAQSection() {
+interface FAQSectionProps {
+	/** Overrides the default "faq" namespace title. */
+	heading?: string
+	/** Overrides the default "faq" namespace subtitle. */
+	subheading?: string
+	/** Overrides the default landing-page FAQ entries. */
+	items?: FaqItem[]
+	/** Optional id for the heading — defaults to "faq-heading". */
+	headingId?: string
+}
+
+export async function FAQSection({
+	heading,
+	subheading,
+	items,
+	headingId = 'faq-heading',
+}: FAQSectionProps = {}) {
 	const t = await getTranslations('faq')
 
-	const items: FaqItem[] = [
-		{ question: t('q1'), answer: t('a1') },
-		{ question: t('q2'), answer: t('a2') },
-		{ question: t('q3'), answer: t('a3') },
-		{ question: t('q4'), answer: t('a4') },
-		{ question: t('q5'), answer: t('a5') },
-		{ question: t('q6'), answer: t('a6') },
-		{ question: t('q7'), answer: t('a7') },
-	]
+	const hasCustomContent = heading !== undefined || items !== undefined
+	const resolvedHeading = heading ?? t('title')
+	const resolvedSubheading =
+		subheading ?? (hasCustomContent ? undefined : t('subtitle'))
+	const resolvedItems: FaqItem[] =
+		items ??
+		([1, 2, 3, 4, 5, 6, 7] as const).map((n) => ({
+			question: t(`q${n}`),
+			answer: t(`a${n}`),
+		}))
 
 	return (
-		<section className="bg-surface py-32" aria-labelledby="faq-heading">
+		<section className="bg-surface py-32" aria-labelledby={headingId}>
 			<div className="mx-auto max-w-3xl px-6">
 				<ScrollReveal className="mb-16 text-center">
 					<h2
-						id="faq-heading"
+						id={headingId}
 						className="font-heading text-4xl font-bold tracking-[-0.03em] text-foreground md:text-5xl"
 					>
-						{t('title')}
+						{resolvedHeading}
 					</h2>
-					<p className="mx-auto mt-4 max-w-xl font-sans text-base leading-[1.7] text-muted-foreground">
-						{t('subtitle')}
-					</p>
+					{resolvedSubheading && (
+						<p className="mx-auto mt-4 max-w-xl font-sans text-base leading-[1.7] text-muted-foreground">
+							{resolvedSubheading}
+						</p>
+					)}
 				</ScrollReveal>
 
 				<ScrollReveal>
 					<div className="divide-y divide-outline-variant/20">
-						{items.map((item) => (
-							<details key={item.question} className="group">
+						{resolvedItems.map((item) => (
+							<details key={item.id ?? item.question} className="group">
 								<summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-6 font-heading text-base font-semibold tracking-[-0.03em] text-foreground transition-opacity duration-200 hover:opacity-80 [&::-webkit-details-marker]:hidden">
 									{item.question}
 									<svg

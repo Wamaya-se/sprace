@@ -335,12 +335,20 @@ _Konvertera besökare till användare — separata flows för kreatörer och fö
 - [x] FAQ-sektion (7 frågor/svar, native `<details>` accordion, FAQPage JSON-LD)
 - [x] Animationer/mikrointeraktioner: `ScrollReveal` (IntersectionObserver + CSS fade-up), staggered grid items, hero entrance keyframes, `prefers-reduced-motion` respekteras
 
-### 7b. Målgruppsanpassade sidor
+### 7b. Målgruppsanpassade sidor ✅
 
-- [ ] `/for-creators` — Varför vara med som kreatör? Intäktspotential, enkelt flöde, flexibilitet, testimonials
-- [ ] `/for-businesses` — Varför boka via Sprace? Kvalitetssäkring, trygga betalningar, stor pool
-- [ ] `/how-it-works` (egen sida) — Steg-för-steg med illustrationer, separata flöden för kreatör/business
-- [ ] `/pricing` — Transparent avgiftsmodell, jämförelse med direktbokning, ROI-kalkylator
+- [x] `/for-creators` — Hero, 6 benefits, 5-step flow, earnings ranges, testimonials, CTA. Full SEO (metadata + OG + canonical).
+- [x] `/for-businesses` — Hero, social proof, 6 benefits, 5-step flow, value stats (3 days / 100 % / 15 %), CTA. Full SEO.
+- [x] `/how-it-works` — Dual-column side-by-side flows (creator + business, 5 steps each), "Built-in protections" grid (escrow, verified creators, disputes, GDPR), CTA. Full SEO.
+- [x] `/pricing` — Transparent pricing cards (creators + businesses), interactive ROI calculator (`PricingCalculator` client component reading live `platform_fee_percent` from `platform_settings`, slider 500–100 000 SEK, breakdown into business total / platform fee / creator payout), comparison table (Sprace vs. direct booking), pricing-specific FAQ (5 Q&A), CTA. Full SEO.
+- [x] `FAQSection` refactored to accept optional `heading` / `subheading` / `items` / `headingId` props — reused on landing (default landing FAQ) and pricing (custom pricing FAQ)
+- [x] Navbar updated: 5-link nav (`/creators`, `/for-creators`, `/for-businesses`, `/how-it-works`, `/pricing`), breakpoint bumped from `md` to `lg` to avoid crowding
+- [x] Footer platform section updated with new target pages
+- [x] `sitemap.ts` updated with all 4 new marketing routes (priority 0.7–0.8)
+- [x] i18n: `forCreators`, `forBusinesses`, `howItWorksPage`, `pricing` namespaces + metadata entries + 3 new `nav` + 2 new `footer` keys
+- [x] Quality review: raw `<p>` pills replaced with `Badge` component (how-it-works dual-column + pricing plan cards), `HowTo` JSON-LD added to `/how-it-works`, `FAQPage` JSON-LD added to `/pricing`
+- [x] Process hardening: "Definition of Done" added to `.cursorrules` + `CLAUDE.md` making `quality-review` mandatory before a sprint can be marked complete; `quality-review` skill header updated to reflect non-negotiable status
+- [x] Verified: `npm run typecheck` clean, `npm run lint` 0/0, `npm run test:run` 58/58 passing
 
 ### 7c. Trust & SEO-sidor
 
