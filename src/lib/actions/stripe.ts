@@ -202,7 +202,7 @@ export async function processPayoutForBooking(
 			`
 			id, status, creator_payout, stripe_payment_intent_id, currency,
 			booking:bookings!payments_booking_id_fkey(
-				id, title, creator:creators!bookings_creator_id_fkey(stripe_account_id, profile_id)
+				id, title, creator:creators!bookings_creator_id_fkey(stripe_account_id, profile_id, profile:profiles!creators_profile_id_fkey(email))
 			)
 		`,
 		)
@@ -220,7 +220,11 @@ export async function processPayoutForBooking(
 	const booking = payment.booking as unknown as {
 		id: string
 		title: string
-		creator: { stripe_account_id: string | null; profile_id: string }
+		creator: {
+			stripe_account_id: string | null
+			profile_id: string
+			profile: { email: string } | null
+		}
 	}
 
 	const isAdmin = user.app_metadata?.role === 'admin'
@@ -266,6 +270,24 @@ export async function processPayoutForBooking(
 		}).catch((err) =>
 			console.error('[processPayoutForBooking] notification failed', err),
 		)
+
+		// Deliver payout statement PDF to creator. Non-fatal.
+		if (booking.creator.profile?.email) {
+			const { deliverCreatorPayoutStatement } =
+				await import('@/lib/pdf/delivery')
+			await deliverCreatorPayoutStatement({
+				paymentId: payment.id,
+				to: booking.creator.profile.email,
+				subject: nt('payoutStatementEmailSubject', { title: booking.title }),
+				bodyTitle: nt('payoutStatementEmailTitle'),
+				bodyText: nt('payoutStatementEmailBody', {
+					amount: payoutAmount,
+					title: booking.title,
+				}),
+				link: `/dashboard/bookings/${parsed.data}`,
+				ctaLabel: nt('viewBooking'),
+			})
+		}
 
 		revalidatePath(`/dashboard/bookings/${parsed.data}`)
 		return { success: true, data: undefined }

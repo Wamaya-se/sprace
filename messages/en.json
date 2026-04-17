@@ -813,7 +813,11 @@
 		"amount": "Amount",
 		"platformFee": "Platform fee",
 		"creatorPayout": "Creator payout",
-		"amountFormatted": "{amount} SEK"
+		"amountFormatted": "{amount} SEK",
+		"receipt": "Receipt",
+		"downloadReceipt": "Download PDF",
+		"payoutStatement": "Payout statement",
+		"downloadPayoutStatement": "Download PDF"
 	},
 	"notifications": {
 		"title": "Notifications",
@@ -866,7 +870,14 @@
 		"disputeResolved": "Dispute resolved",
 		"disputeResolvedBody": "The dispute for \"{title}\" has been resolved.",
 		"loadMore": "Load more",
-		"loadingMore": "Loading..."
+		"loadingMore": "Loading...",
+		"viewBooking": "View booking",
+		"receiptEmailSubject": "Your Sprace receipt for \"{title}\"",
+		"receiptEmailTitle": "Your payment receipt",
+		"receiptEmailBody": "Payment for \"{title}\" was processed successfully. Your receipt is attached as a PDF for your records.",
+		"payoutStatementEmailSubject": "Payout statement for \"{title}\"",
+		"payoutStatementEmailTitle": "Your payout has been sent",
+		"payoutStatementEmailBody": "Your payout of {amount} SEK for \"{title}\" has been transferred. The statement is attached as a PDF."
 	},
 	"deliveries": {
 		"title": "Deliveries",

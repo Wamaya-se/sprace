@@ -124,6 +124,41 @@ export function PaymentCard({
 										</span>
 									</div>
 								)}
+								{userRole === 'business' &&
+									(payment.status === 'captured' ||
+										payment.status === 'transferred' ||
+										payment.status === 'refunded') && (
+										<div className="flex items-center justify-between pt-1">
+											<span className="font-sans text-sm text-muted-foreground">
+												{t('receipt')}
+											</span>
+											<Button variant="outline" size="sm" asChild>
+												<a
+													href={`/api/receipts/${payment.id}`}
+													target="_blank"
+													rel="noopener"
+												>
+													{t('downloadReceipt')}
+												</a>
+											</Button>
+										</div>
+									)}
+								{userRole === 'creator' && payment.status === 'transferred' && (
+									<div className="flex items-center justify-between pt-1">
+										<span className="font-sans text-sm text-muted-foreground">
+											{t('payoutStatement')}
+										</span>
+										<Button variant="outline" size="sm" asChild>
+											<a
+												href={`/api/payout-statements/${payment.id}`}
+												target="_blank"
+												rel="noopener"
+											>
+												{t('downloadPayoutStatement')}
+											</a>
+										</Button>
+									</div>
+								)}
 							</div>
 						)}
 

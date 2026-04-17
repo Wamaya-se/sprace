@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 					.select(
 						`title,
 					creator:creators!bookings_creator_id_fkey(profile_id, stripe_onboarding_complete),
-					business:businesses!bookings_business_id_fkey(profile_id)`,
+					business:businesses!bookings_business_id_fkey(profile_id, contact_email, profile:profiles!businesses_profile_id_fkey(email))`,
 					)
 					.eq('id', bookingId)
 					.single()
@@ -114,6 +114,8 @@ export async function POST(request: NextRequest) {
 					} | null
 					const business = booking.business as unknown as {
 						profile_id: string
+						contact_email: string | null
+						profile: { email: string } | null
 					} | null
 
 					const notifications: Promise<void>[] = []
@@ -166,6 +168,35 @@ export async function POST(request: NextRequest) {
 					await Promise.all(notifications).catch((err) =>
 						console.error('[webhook] payment notifications failed', err),
 					)
+
+					// Deliver PDF receipt to business. Non-fatal — if this fails the
+					// booking still went through; the receipt can be regenerated
+					// on-demand from the booking detail page.
+					if (business) {
+						const recipient = business.contact_email ?? business.profile?.email
+						if (recipient) {
+							const { data: paymentRow } = await supabase
+								.from('payments')
+								.select('id')
+								.eq('booking_id', bookingId)
+								.single()
+							if (paymentRow?.id) {
+								const { deliverBusinessReceipt } =
+									await import('@/lib/pdf/delivery')
+								await deliverBusinessReceipt({
+									paymentId: paymentRow.id,
+									to: recipient,
+									subject: nt('receiptEmailSubject', {
+										title: booking.title,
+									}),
+									bodyTitle: nt('receiptEmailTitle'),
+									bodyText: nt('receiptEmailBody', { title: booking.title }),
+									link: `/dashboard/bookings/${bookingId}`,
+									ctaLabel: nt('viewBooking'),
+								})
+							}
+						}
+					}
 				}
 
 				break

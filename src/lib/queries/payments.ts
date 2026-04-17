@@ -17,7 +17,7 @@ export async function getPaymentForBooking(bookingId: string) {
 	const { data } = await supabase
 		.from('payments')
 		.select(
-			'id, amount_total, platform_fee, creator_payout, currency, status, captured_at, transferred_at, refunded_at',
+			'id, amount_total, platform_fee, creator_payout, currency, status, captured_at, transferred_at, refunded_at, receipt_number, payout_statement_number',
 		)
 		.eq('booking_id', parsed.data)
 		.single()
