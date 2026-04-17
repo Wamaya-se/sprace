@@ -615,7 +615,11 @@ export type Database = {
           creator_payout: number
           currency: string
           id: string
+          payout_statement_issued_at: string | null
+          payout_statement_number: string | null
           platform_fee: number
+          receipt_issued_at: string | null
+          receipt_number: string | null
           refunded_at: string | null
           status: Database["public"]["Enums"]["payment_status"]
           stripe_checkout_session_id: string | null
@@ -632,7 +636,11 @@ export type Database = {
           creator_payout: number
           currency?: string
           id?: string
+          payout_statement_issued_at?: string | null
+          payout_statement_number?: string | null
           platform_fee: number
+          receipt_issued_at?: string | null
+          receipt_number?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_checkout_session_id?: string | null
@@ -649,7 +657,11 @@ export type Database = {
           creator_payout?: number
           currency?: string
           id?: string
+          payout_statement_issued_at?: string | null
+          payout_statement_number?: string | null
           platform_fee?: number
+          receipt_issued_at?: string | null
+          receipt_number?: string | null
           refunded_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           stripe_checkout_session_id?: string | null
@@ -943,6 +955,14 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      assign_receipt_number: {
+        Args: { p_payment_id: string }
+        Returns: string
+      }
+      assign_payout_statement_number: {
+        Args: { p_payment_id: string }
+        Returns: string
+      }
       get_user_conversations_with_last_message: {
         Args: never
         Returns: Array<{
