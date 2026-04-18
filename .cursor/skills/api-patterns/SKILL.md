@@ -362,6 +362,34 @@ If a function is called both during render (data fetching) _and_ from a form act
 
 Fire-and-forget side effects (like `markAsRead`) that run during page load must **not** call `revalidatePath`. The page is already rendering fresh data.
 
+### `unstable_cache` + cookie-less Supabase client (Next.js 16 hard rule)
+
+Next.js 16 forbids reading dynamic sources (including `cookies()`) inside any function wrapped by `unstable_cache()`. The regular `createClient()` from `@/lib/supabase/server` binds to the request cookie store and therefore **crashes the build** when called inside a cached scope.
+
+For public, non-personalised reads that need long-lived caching (marketing pages, taxonomy, platform settings), use `createPublicClient()` from `@/lib/supabase/public`:
+
+```tsx
+import { unstable_cache } from 'next/cache'
+import { createPublicClient } from '@/lib/supabase/public'
+
+const getCategoriesWithCounts = unstable_cache(
+	async () => {
+		const supabase = createPublicClient() // no cookies, no session
+		const { data } = await supabase.from('specialties').select('*')
+		return data ?? []
+	},
+	['creators-categories'],
+	{ revalidate: 300, tags: ['specialties'] },
+)
+```
+
+Rules:
+
+- Every read inside `unstable_cache` must go through `createPublicClient()` — not `createClient()` / `createServiceClient()` / `createAdminClient()`.
+- Only use `createPublicClient()` for data that is equally visible to every visitor (RLS anon policies must permit the reads).
+- For user-scoped reads, use `createClient()` from `@/lib/supabase/server` and wrap with `React.cache()` instead — it's per-request dedup, not global caching.
+- Invalidate public cache entries from mutations with `revalidateTag('tag', 'max')` (Next 16 requires the profile argument).
+
 ### Caching & revalidation strategy
 
 | Data type         | Strategy                                       | Why                                                     |

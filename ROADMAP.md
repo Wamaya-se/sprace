@@ -1,6 +1,6 @@
 # Sprace — Roadmap
 
-> Updated: 2026-04-18 (Fas 8a–e) | Format: compact, token-efficient. Update after each session.
+> Updated: 2026-04-18 (Production launch) | Format: compact, token-efficient. Update after each session.
 
 ## Completed Refactor Sprint — 2026-04-17 ✅
 
@@ -503,6 +503,46 @@ _Allt som krävs för att skeppa till riktiga användare._
 - [ ] 10d: Responsiv polish-pass (alla sidor, alla breakpoints)
 - [ ] 10e: Performance-pass (lazy loading, image optimization, cache headers, bundle-analys)
 - [ ] 10f: Monitoring (Sentry, uptime, Stripe webhook dashboard)
+
+## Deployment — 2026-04-18 ✅
+
+_Första live-deployen. Test-mode för auth; Stripe/Resend/Upstash/Sentry uppskjutna._
+
+### Infrastruktur
+
+- **Supabase prod**: projekt `lgosxvblnbamfilbwxdq` (West EU / Ireland), 28 migrationer applicerade via `supabase db push`
+- **Vercel prod**: `wamayas-projects/sprace` (Hobby), kopplad till GitHub `Wamaya-se/sprace` (repot måste vara publikt på Hobby när det är org-ägt)
+- **Live URL**: https://sprace.vercel.app
+- **Auto-deploy**: push till `main` → ny production build
+
+### Env vars satta i Vercel (production)
+
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — Supabase-nycklar i nya `sb_publishable_*` / `sb_secret_*`-formatet (stöds av `@supabase/ssr 0.9.0` och `@supabase/supabase-js 2.100.1`)
+- `NEXT_PUBLIC_SITE_URL=https://sprace.vercel.app`
+
+### Build-blocker åtgärdad (commit `62260c1`)
+
+Next.js 16 förbjuder läsning av dynamiska källor (bl.a. `cookies()`) inuti `unstable_cache()`. Fyra publika cachade reads använde den cookie-bärande server-klienten och kraschade `next build` vid prerender av `/for-creators`.
+
+- Ny `src/lib/supabase/public.ts` → `createPublicClient()` — anon-klient utan cookies/session, safe inside `unstable_cache`.
+- Migrerade anropsställen: `getPlatformEntity` (`src/lib/queries/platform-entity.ts`), `getPublicLandingStats` (`src/lib/marketing/get-public-landing-stats.ts`), `getCategoriesWithCounts` (`src/app/(marketing)/creators/page.tsx`), `_getCreatorsForSpecialty` (`src/app/(marketing)/creators/category/[slug]/page.tsx`).
+
+### Kvar innan end-to-end-flöden fungerar
+
+- [ ] **Supabase Auth URL Configuration** (manuellt i Dashboard): Site URL = `https://sprace.vercel.app`, Redirect URLs = `…/auth/callback` + `…/**`
+- [ ] **Supabase Auth Providers**: slå av allt utom Email, slå på "Confirm email"
+- [ ] `PII_ENCRYPTION_KEY` — kreatörsregistrering kraschar utan
+- [ ] Stripe test keys (`STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) + webhook-endpoint mot `/api/stripe/webhooks`
+- [ ] Resend API-nyckel + verifierad avsändardomän (email-flöden)
+- [ ] Upstash Redis (utan denna = fail-open rate limiting, ingen skydd på login/register)
+- [ ] Sentry DSN (valfritt, inbyggt bakom `NEXT_PUBLIC_SENTRY_DSN`)
+
+### Lärdomar
+
+- `unstable_cache()` + cookie-bärande server-klient = Next.js 16 build-error. Publika cached reads ska gå via `createPublicClient()` från `src/lib/supabase/public.ts`.
+- Vercel Hobby kopplar inte auto-deploy till privata GitHub-repos som ägs av en **organization**. Alternativ: Pro, publikt repo, eller flytta till personligt konto.
+- Vercel CLI `vercel env add` tar **ett** environment per anrop (`production | preview | development`). Batch via shell-loop eller dashboard.
+- Supabase CLI läser inte `.env.local` — variabler måste exporteras in i shell: `set -a; source .env.local; set +a`.
 
 ## Framtida idéer (odesignade)
 

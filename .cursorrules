@@ -81,7 +81,7 @@ Reporting a sprint as "done" without running the quality review is a process fai
 - **Read/write separation**: Read-only loaders live in `src/lib/queries/*.ts` (`import 'server-only'`). Server Actions in `src/lib/actions/*.ts` are for mutations. Actions may re-export types from queries, and may wrap a query in a thin Server Action when a client component needs to invoke a read.
 - **Pure helpers stay pure**: Never put state machines, Zod schemas, or role predicates behind `'use server'`/`'server-only'`. Put them in `src/lib/<domain>/*.ts` so they can be unit-tested without Supabase/Next runtime.
 - **Request-scoped dedup**: Wrap data loaders (`getBooking`, `getCurrentUser`, etc.) with `cache()` from React so multiple callers in one request share a single query.
-- **Public-route caching**: Use `unstable_cache(fn, key, { revalidate, tags })` for expensive reads on marketing routes. Invalidate from related admin mutations with `revalidateTag('tag', 'max')` — Next 16 requires the profile argument.
+- **Public-route caching**: Use `unstable_cache(fn, key, { revalidate, tags })` for expensive reads on marketing routes. Invalidate from related admin mutations with `revalidateTag('tag', 'max')` — Next 16 requires the profile argument. Inside the cached function, use `createPublicClient()` from `@/lib/supabase/public` (cookie-less anon client) — never `createClient()` from `@/lib/supabase/server`, which reads cookies and causes a Next.js 16 build error.
 
 ## High-priority cross-cutting concerns
 
