@@ -12,6 +12,7 @@ const creatorTitleKeys: Record<string, string> = {
 	'/dashboard': 'overview',
 	'/dashboard/analytics': 'analytics',
 	'/dashboard/bookings': 'bookings',
+	'/dashboard/campaigns': 'campaigns',
 	'/dashboard/messages': 'messages',
 	'/dashboard/notifications': 'notifications',
 	'/dashboard/reviews': 'reviews',
@@ -67,9 +68,11 @@ export function DashboardHeader({
 				? 'discover'
 				: pathname.startsWith('/dashboard/bookings/')
 					? 'bookings'
-					: pathname.startsWith('/dashboard/messages/')
-						? 'messages'
-						: 'overview')
+					: pathname.startsWith('/dashboard/campaigns/')
+						? 'campaigns'
+						: pathname.startsWith('/dashboard/messages/')
+							? 'messages'
+							: 'overview')
 	const title = t(titleKey)
 
 	return (

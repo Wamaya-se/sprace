@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/shared/theme-toggle'
 
 interface NavbarLabels {
 	creators: string
+	campaigns: string
 	howItWorks: string
 	forCreators: string
 	forBusinesses: string
@@ -25,6 +26,7 @@ interface NavbarLabels {
 
 const NAV_LINKS = [
 	{ href: '/creators', labelKey: 'creators' as const },
+	{ href: '/campaigns', labelKey: 'campaigns' as const },
 	{ href: '/for-creators', labelKey: 'forCreators' as const },
 	{ href: '/for-businesses', labelKey: 'forBusinesses' as const },
 	{ href: '/how-it-works', labelKey: 'howItWorks' as const },

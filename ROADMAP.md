@@ -447,16 +447,23 @@ _Ger användarna data som ökar retention._
 - [x] Quality review genomförd: landmarks + heading-hierarki (layout=h1, page=h2), role-guard både i middleware och sida, i18n 100% för nya strängar (32/32), Shadcn `Avatar`/`Card` används, SQL `security invoker` + RLS, `robots.ts` disallowar `/admin/` (var inte tidigare blockerad).
 - [x] A11y: `RangePicker` är `role="group"` med `aria-pressed` + `aria-label`; `MultiAreaChart`/`RevenueChart` har `role="img"` + `aria-label` (total + periodbeskrivning); chart-färger från `--chart-1/3/5`-tokens som justeras för dark mode.
 
-## Fas 9: Campaign Management
+## Fas 9: Campaign Management ✅
 
-_Multi-kreatör-bokningar under ett gemensamt brief._
+_Multi-kreatör-bokningar under ett gemensamt brief. Open-applications-modell + pitch-plus-chat._
 
-- [ ] `campaigns` tabell (titel, beskrivning, budget, deadline, status)
-- [ ] `campaign_bookings` koppling (kampanj → flera bokningar)
-- [ ] Business skapar kampanj → bjuder in kreatörer
-- [ ] Kampanjvy med individuella bokningsspår + aggregerad progress
-- [ ] Kampanjstatus (draft → active → completed)
-- [ ] Campaign overview i business dashboard + admin
+- [x] `campaigns` tabell (titel, beskrivning, budget_per_creator, total_budget, deadline, status, slug, specialties/markets junctions)
+- [x] `campaign_applications` tabell (pitch, proposed_price, status) + notifikations-enum utökad med 5 nya typer
+- [x] Additiva kolumner: `bookings.campaign_id`, `bookings.application_id`, `conversations.application_id` + RLS-policies
+- [x] State machines: `campaign_status` (draft → open → closed/cancelled/completed) och `application_status` (pending → shortlisted/accepted/declined/withdrawn) i pure moduler med unit-tester
+- [x] Zod-scheman för create/update/apply + slug-generator + 38 unit-tester (totalt 154 passerar)
+- [x] Server actions: createCampaign, publishCampaign, closeCampaign, cancelCampaign, applyCampaign, shortlist/accept/decline/withdraw, startApplicationConversation + completeCampaignIfDone
+- [x] Business dashboard: `/dashboard/campaigns` lista + `/new` + detalj med Details/Applications/Bookings-tabs + application-detalj med inbyggd chat
+- [x] Creator dashboard: campaigns-browse via publika listan + applications-översikt + application-detalj med chat
+- [x] Publika sidor: `/campaigns` index + `/campaigns/[slug]` med SEO-metadata, JSON-LD (JobPosting), sitemap-inkludering, apply-form för inloggade creators
+- [x] Admin `/admin/campaigns` med status-filter och force-cancel-action
+- [x] Sidebars (creator + admin), dashboard/admin-headers, marketing-navbar och footer uppdaterade med campaigns-länkar
+- [x] i18n-namespace `campaigns` (~120 nycklar) + systemmeddelanden för alla nya notifikations-typer + metadata-keys
+- [x] Quality review: typecheck ✓, lint ✓, test ✓ (154/154), i18n ✓; heading-hierarki (layout=h1, page=h2, sections=h3), RLS på alla nya tabeller, SECURITY INVOKER, Zod-validering, ActionResult-mönster, `h2 → h3`-hierarki korrigerad i detaljsidor.
 
 ## Fas 10: Polish & Production-readiness
 
@@ -482,7 +489,7 @@ _Allt som krävs för att skeppa till riktiga användare._
 
 ## DB Schema Status
 
-Tables live: profiles (incl. tos_accepted_at, tos_version), creators, specialties, creator_specialties, services, service_media, businesses, markets, creator_markets, platform_settings, saved_creators, bookings, conversations, messages, payments, notifications, reviews, stripe_webhook_events, booking_deliveries, delivery_files, disputes
-Enums live: user_role, media_type, creator_status, booking_status (incl. awaiting_payment, disputed), payment_status, notification_type (incl. delivery_submitted, delivery_approved, stripe_onboarding_required, dispute_opened, dispute_resolved), delivery_status, dispute_status
+Tables live: profiles (incl. tos_accepted_at, tos_version), creators, specialties, creator_specialties, services, service_media, businesses, markets, creator_markets, platform_settings, saved_creators, bookings (incl. campaign_id, application_id), conversations (incl. application_id), messages, payments, notifications, reviews, stripe_webhook_events, booking_deliveries, delivery_files, disputes, reports, user_blocks, campaigns, campaign_specialties, campaign_markets, campaign_applications
+Enums live: user_role, media_type, creator_status, booking_status (incl. awaiting_payment, disputed), payment_status, notification_type (incl. delivery_submitted, delivery_approved, stripe_onboarding_required, dispute_opened, dispute_resolved, campaign_new_application, campaign_application_shortlisted, campaign_application_accepted, campaign_application_declined, campaign_closed), delivery_status, dispute_status, campaign_status, application_status
 Storage: `media` bucket — INSERT scoped to `{userId}/` path, MIME types include images, video (mp4/webm/quicktime), PDF, ZIP
 Auth flows: email/password login, Google OAuth, password reset (forgot + reset pages), email verification (verify-email + resend), account deletion (self-service)

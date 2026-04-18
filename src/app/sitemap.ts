@@ -94,13 +94,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	const supabase = await createClient()
 
-	const [creatorsRes, specialtiesRes] = await Promise.all([
+	const [creatorsRes, specialtiesRes, campaignsRes] = await Promise.all([
 		supabase
 			.from('creators')
 			.select('slug, updated_at')
 			.eq('status', 'active')
 			.not('slug', 'is', null),
 		supabase.from('specialties').select('slug').order('name'),
+		supabase
+			.from('campaigns')
+			.select('slug, updated_at')
+			.eq('status', 'open')
+			.order('published_at', { ascending: false }),
 	])
 
 	const creatorPages: MetadataRoute.Sitemap = (creatorsRes.data ?? []).map(
@@ -138,11 +143,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		priority: 0.6,
 	}))
 
+	const campaignIndex: MetadataRoute.Sitemap = [
+		{
+			url: `${BASE_URL}/campaigns`,
+			lastModified: new Date(),
+			changeFrequency: 'daily' as const,
+			priority: 0.8,
+		},
+	]
+
+	const campaignPages: MetadataRoute.Sitemap = (campaignsRes.data ?? []).map(
+		(c) => ({
+			url: `${BASE_URL}/campaigns/${c.slug}`,
+			lastModified: new Date(c.updated_at),
+			changeFrequency: 'weekly' as const,
+			priority: 0.7,
+		}),
+	)
+
 	return [
 		...staticPages,
 		...categoryIndex,
 		...categoryPages,
 		...creatorPages,
+		...campaignIndex,
+		...campaignPages,
 		...blogPages,
 	]
 }

@@ -202,7 +202,7 @@ export async function updateBookingStatus(
 	const { data: booking, error: fetchError } = await supabase
 		.from('bookings')
 		.select(
-			`id, status, title, business_id, creator_id,
+			`id, status, title, business_id, creator_id, campaign_id,
 			business:businesses!bookings_business_id_fkey(profile_id),
 			creator:creators!bookings_creator_id_fkey(profile_id)`,
 		)
@@ -256,6 +256,13 @@ export async function updateBookingStatus(
 		await processPayoutForBooking(parsedId.data).catch((err) =>
 			console.error('[updateBookingStatus] payout failed', err),
 		)
+
+		if (booking.campaign_id) {
+			const { completeCampaignIfDone } = await import('@/lib/actions/campaigns')
+			await completeCampaignIfDone(booking.campaign_id).catch((err) =>
+				console.error('[updateBookingStatus] campaign auto-complete', err),
+			)
+		}
 	}
 
 	if (

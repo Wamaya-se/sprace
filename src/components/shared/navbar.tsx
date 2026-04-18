@@ -7,6 +7,7 @@ export async function Navbar() {
 
 	const labels = {
 		creators: t('creators'),
+		campaigns: t('campaigns'),
 		howItWorks: t('howItWorks'),
 		forCreators: t('forCreators'),
 		forBusinesses: t('forBusinesses'),

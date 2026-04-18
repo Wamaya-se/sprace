@@ -104,6 +104,7 @@ export type Database = {
         Row: {
           budget: number | null
           business_id: string
+          campaign_id: string | null
           created_at: string
           creator_id: string
           deadline: string | null
@@ -119,6 +120,7 @@ export type Database = {
         Insert: {
           budget?: number | null
           business_id: string
+          campaign_id?: string | null
           created_at?: string
           creator_id: string
           deadline?: string | null
@@ -134,6 +136,7 @@ export type Database = {
         Update: {
           budget?: number | null
           business_id?: string
+          campaign_id?: string | null
           created_at?: string
           creator_id?: string
           deadline?: string | null
@@ -152,6 +155,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
           {
@@ -244,8 +254,183 @@ export type Database = {
           },
         ]
       }
+      campaign_applications: {
+        Row: {
+          booking_id: string | null
+          campaign_id: string
+          created_at: string
+          creator_id: string
+          id: string
+          pitch: string
+          proposed_price: number | null
+          status: Database["public"]["Enums"]["application_status"]
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          campaign_id: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          pitch: string
+          proposed_price?: number | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          campaign_id?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          pitch?: string
+          proposed_price?: number | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_applications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_applications_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_applications_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_markets: {
+        Row: {
+          campaign_id: string
+          market_id: string
+        }
+        Insert: {
+          campaign_id: string
+          market_id: string
+        }
+        Update: {
+          campaign_id?: string
+          market_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_markets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_markets_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_specialties: {
+        Row: {
+          campaign_id: string
+          specialty_id: string
+        }
+        Insert: {
+          campaign_id: string
+          specialty_id: string
+        }
+        Update: {
+          campaign_id?: string
+          specialty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_specialties_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_specialties_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          budget_per_creator: number | null
+          business_id: string
+          closed_at: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          id: string
+          published_at: string | null
+          slug: string
+          status: Database["public"]["Enums"]["campaign_status"]
+          title: string
+          total_budget: number | null
+          updated_at: string
+        }
+        Insert: {
+          budget_per_creator?: number | null
+          business_id: string
+          closed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          description: string
+          id?: string
+          published_at?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["campaign_status"]
+          title: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Update: {
+          budget_per_creator?: number | null
+          business_id?: string
+          closed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          published_at?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["campaign_status"]
+          title?: string
+          total_budget?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
+          application_id: string | null
           booking_id: string | null
           created_at: string
           id: string
@@ -254,6 +439,7 @@ export type Database = {
           participant_two: string
         }
         Insert: {
+          application_id?: string | null
           booking_id?: string | null
           created_at?: string
           id?: string
@@ -262,6 +448,7 @@ export type Database = {
           participant_two: string
         }
         Update: {
+          application_id?: string | null
           booking_id?: string | null
           created_at?: string
           id?: string
@@ -270,6 +457,13 @@ export type Database = {
           participant_two?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_booking_id_fkey"
             columns: ["booking_id"]
@@ -1355,6 +1549,12 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      application_status:
+        | "pending"
+        | "shortlisted"
+        | "accepted"
+        | "declined"
+        | "withdrawn"
       booking_status:
         | "pending"
         | "awaiting_payment"
@@ -1365,6 +1565,12 @@ export type Database = {
         | "declined"
         | "cancelled"
         | "disputed"
+      campaign_status:
+        | "draft"
+        | "open"
+        | "closed"
+        | "completed"
+        | "cancelled"
       creator_status: "draft" | "pending_review" | "active" | "suspended"
       delivery_status: "submitted" | "approved" | "revision_requested"
       dispute_status:
@@ -1396,6 +1602,11 @@ export type Database = {
         | "dispute_resolved"
         | "report_resolved"
         | "account_suspended"
+        | "campaign_new_application"
+        | "campaign_application_shortlisted"
+        | "campaign_application_accepted"
+        | "campaign_application_declined"
+        | "campaign_closed"
       org_number_verification_status:
         | "unverified"
         | "pending"
@@ -1546,6 +1757,13 @@ export const Constants = {
   },
   public: {
     Enums: {
+      application_status: [
+        "pending",
+        "shortlisted",
+        "accepted",
+        "declined",
+        "withdrawn",
+      ],
       booking_status: [
         "pending",
         "awaiting_payment",
@@ -1556,6 +1774,13 @@ export const Constants = {
         "declined",
         "cancelled",
         "disputed",
+      ],
+      campaign_status: [
+        "draft",
+        "open",
+        "closed",
+        "completed",
+        "cancelled",
       ],
       creator_status: ["draft", "pending_review", "active", "suspended"],
       delivery_status: ["submitted", "approved", "revision_requested"],
@@ -1589,6 +1814,11 @@ export const Constants = {
         "dispute_resolved",
         "report_resolved",
         "account_suspended",
+        "campaign_new_application",
+        "campaign_application_shortlisted",
+        "campaign_application_accepted",
+        "campaign_application_declined",
+        "campaign_closed",
       ],
       org_number_verification_status: [
         "unverified",

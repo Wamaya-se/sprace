@@ -235,6 +235,7 @@ const creatorNavItems: NavItem[] = [
 	{ labelKey: 'overview', href: '/dashboard', icon: overviewIcon },
 	{ labelKey: 'analytics', href: '/dashboard/analytics', icon: analyticsIcon },
 	{ labelKey: 'bookings', href: '/dashboard/bookings', icon: bookingsIcon },
+	{ labelKey: 'campaigns', href: '/dashboard/campaigns', icon: campaignsIcon },
 	{ labelKey: 'messages', href: '/dashboard/messages', icon: messagesIcon },
 	{ labelKey: 'profile', href: '/dashboard/profile', icon: profileIcon },
 	{ labelKey: 'services', href: '/dashboard/services', icon: servicesIcon },
