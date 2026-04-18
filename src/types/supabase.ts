@@ -39,6 +39,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_broadcasts: {
+        Row: {
+          audience: Database["public"]["Enums"]["broadcast_audience"]
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          link: string | null
+          recipients_count: number
+          sent_at: string | null
+          status: Database["public"]["Enums"]["broadcast_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["broadcast_audience"]
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          recipients_count?: number
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["broadcast_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["broadcast_audience"]
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          recipients_count?: number
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["broadcast_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_broadcasts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_deliveries: {
         Row: {
           booking_id: string
@@ -1555,6 +1643,19 @@ export type Database = {
         | "accepted"
         | "declined"
         | "withdrawn"
+      audit_action:
+        | "user.role_changed"
+        | "user.deleted"
+        | "user.suspended"
+        | "user.unsuspended"
+        | "creator.status_changed"
+        | "business.org_verified"
+        | "dispute.resolved"
+        | "report.resolved"
+        | "report.dismissed"
+        | "report.reviewing"
+        | "broadcast.sent"
+        | "platform_settings.updated"
       booking_status:
         | "pending"
         | "awaiting_payment"
@@ -1565,12 +1666,9 @@ export type Database = {
         | "declined"
         | "cancelled"
         | "disputed"
-      campaign_status:
-        | "draft"
-        | "open"
-        | "closed"
-        | "completed"
-        | "cancelled"
+      broadcast_audience: "all" | "creators" | "businesses"
+      broadcast_status: "draft" | "sent"
+      campaign_status: "draft" | "open" | "closed" | "completed" | "cancelled"
       creator_status: "draft" | "pending_review" | "active" | "suspended"
       delivery_status: "submitted" | "approved" | "revision_requested"
       dispute_status:
@@ -1607,6 +1705,7 @@ export type Database = {
         | "campaign_application_accepted"
         | "campaign_application_declined"
         | "campaign_closed"
+        | "admin_broadcast"
       org_number_verification_status:
         | "unverified"
         | "pending"
@@ -1764,6 +1863,20 @@ export const Constants = {
         "declined",
         "withdrawn",
       ],
+      audit_action: [
+        "user.role_changed",
+        "user.deleted",
+        "user.suspended",
+        "user.unsuspended",
+        "creator.status_changed",
+        "business.org_verified",
+        "dispute.resolved",
+        "report.resolved",
+        "report.dismissed",
+        "report.reviewing",
+        "broadcast.sent",
+        "platform_settings.updated",
+      ],
       booking_status: [
         "pending",
         "awaiting_payment",
@@ -1775,13 +1888,9 @@ export const Constants = {
         "cancelled",
         "disputed",
       ],
-      campaign_status: [
-        "draft",
-        "open",
-        "closed",
-        "completed",
-        "cancelled",
-      ],
+      broadcast_audience: ["all", "creators", "businesses"],
+      broadcast_status: ["draft", "sent"],
+      campaign_status: ["draft", "open", "closed", "completed", "cancelled"],
       creator_status: ["draft", "pending_review", "active", "suspended"],
       delivery_status: ["submitted", "approved", "revision_requested"],
       dispute_status: [
@@ -1819,6 +1928,7 @@ export const Constants = {
         "campaign_application_accepted",
         "campaign_application_declined",
         "campaign_closed",
+        "admin_broadcast",
       ],
       org_number_verification_status: [
         "unverified",

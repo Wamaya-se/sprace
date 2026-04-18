@@ -469,13 +469,26 @@ _Multi-kreatör-bokningar under ett gemensamt brief. Open-applications-modell + 
 
 _Allt som krävs för att skeppa till riktiga användare._
 
-- [ ] Onboarding-guide (tooltip-tour för nya användare)
-- [ ] Admin: audit log, broadcast-meddelanden
-- [ ] Rate limiting: login, registration, Server Actions (app-nivå, ej bara Supabase)
-- [ ] Responsiv polish-pass (alla sidor, alla breakpoints)
-- [ ] Performance-pass (lazy loading, image optimization, cache headers, bundle-analys)
-- [ ] Monitoring: error tracking (Sentry), uptime, Stripe webhook dashboard
-- [ ] Admin JWT role-sync hardening: retry-logik vid `updateUserById`-fel
+### Fas 10a — Admin hardening (klar)
+
+- [x] Admin audit log: `admin_audit_log`-tabell med enum `audit_action`, RLS (admins läser, inga direkta mutationer — inserts via service-role).
+- [x] `logAuditEvent`-helper hookad i alla känsliga admin-mutationer (role change, delete, suspend/unsuspend, creator-status, org-verifiering, dispute-resolve, report-resolve/dismiss/reviewing, broadcast.sent, platform_settings.updated).
+- [x] `/admin/audit-log` med filter (action, actor), paginering och metadata-drawer.
+- [x] Admin broadcast-meddelanden: `admin_broadcasts`-tabell + `notification_type='admin_broadcast'`, `createBroadcast` / `sendBroadcast` / `deleteBroadcast` Server Actions, chunkad fan-out (200/chunk), audience-filter (all/creators/businesses, skippar suspenderade), draft/sent-flöde.
+- [x] `/admin/broadcasts` med compose-form + history, `BroadcastRowActions` (send/delete med AlertDialog).
+- [x] Admin JWT role-sync hardening: `syncAppMetadataRole` med retry (3 försök, exponential backoff + jitter) och rollback i `profiles.role` vid slutgiltigt fel.
+- [x] i18n (en.json): `admin.broadcasts/auditLog`, `broadcasts.*`, `auditLog.*`, metadata-titlar, fel-nycklar.
+- [x] Sidebar + admin-header uppdaterade med nya länkar/titlar.
+- [x] Tests: `tests/unit/admin-schemas.test.ts` (15 tester) — createBroadcast/sendBroadcast/auditLogFilters-scheman.
+- [x] Quality review: typecheck ✓, lint ✓, test ✓ (169/169).
+
+### Fas 10b–10f — kvar
+
+- [ ] 10b: Onboarding-guide (tooltip-tour för nya användare)
+- [ ] 10c: Rate limiting (login, registration, Server Actions — app-nivå)
+- [ ] 10d: Responsiv polish-pass (alla sidor, alla breakpoints)
+- [ ] 10e: Performance-pass (lazy loading, image optimization, cache headers, bundle-analys)
+- [ ] 10f: Monitoring (Sentry, uptime, Stripe webhook dashboard)
 
 ## Framtida idéer (odesignade)
 

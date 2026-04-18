@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/guards'
+import { logAuditEvent } from '@/lib/audit/log'
 import type { ActionResult } from '@/types/actions'
 import { isValidOrgNumber } from '@/lib/validation/se-identifiers'
 
@@ -59,7 +60,7 @@ function validateSetting(
 export async function updatePlatformSettings(
 	settings: { key: string; value: string }[],
 ): Promise<ActionResult> {
-	const { supabase } = await requireAdmin()
+	const { user, supabase } = await requireAdmin()
 
 	const parsed = batchSchema.safeParse(settings)
 	if (!parsed.success) {
@@ -84,6 +85,15 @@ export async function updatePlatformSettings(
 			return { success: false, error: 'errors.couldNotSaveSettings' }
 		}
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'platform_settings.updated',
+		targetType: 'platform_settings',
+		metadata: {
+			keys: parsed.data.map((s) => s.key),
+		},
+	})
 
 	revalidatePath('/admin/settings')
 	revalidateTag('platform-entity', 'max')

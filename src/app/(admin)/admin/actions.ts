@@ -4,6 +4,8 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth/guards'
+import { syncAppMetadataRole } from '@/lib/auth/role-sync'
+import { logAuditEvent } from '@/lib/audit/log'
 import type { ActionResult } from '@/types/actions'
 
 const updateRoleSchema = z.object({
@@ -36,6 +38,10 @@ export async function updateUserRole(
 		return { success: false, error: 'errors.userNotFound' }
 	}
 
+	if (previousProfile.role === parsed.data.role) {
+		return { success: true, data: undefined }
+	}
+
 	const { error: updateError } = await supabase
 		.from('profiles')
 		.update({ role: parsed.data.role })
@@ -46,16 +52,15 @@ export async function updateUserRole(
 		return { success: false, error: 'errors.couldNotUpdateRole' }
 	}
 
-	const adminClient = createAdminClient()
-	const { error: metaError } = await adminClient.auth.admin.updateUserById(
-		parsed.data.userId,
-		{ app_metadata: { role: parsed.data.role } },
-	)
+	const sync = await syncAppMetadataRole({
+		userId: parsed.data.userId,
+		role: parsed.data.role,
+	})
 
-	if (metaError) {
+	if (!sync.ok) {
 		console.error(
-			'[updateUserRole] app_metadata sync failed, rolling back',
-			metaError,
+			'[updateUserRole] app_metadata sync failed after retries, rolling back',
+			{ attempts: sync.attempts, error: sync.error },
 		)
 		await supabase
 			.from('profiles')
@@ -63,6 +68,18 @@ export async function updateUserRole(
 			.eq('id', parsed.data.userId)
 		return { success: false, error: 'errors.couldNotUpdateRole' }
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'user.role_changed',
+		targetType: 'profile',
+		targetId: parsed.data.userId,
+		metadata: {
+			previousRole: previousProfile.role,
+			nextRole: parsed.data.role,
+			syncAttempts: sync.attempts,
+		},
+	})
 
 	revalidatePath('/admin/users')
 	revalidatePath(`/admin/users/${parsed.data.userId}`)
@@ -78,11 +95,21 @@ export async function updateCreatorStatus(
 	creatorId: string,
 	status: 'draft' | 'pending_review' | 'active' | 'suspended',
 ): Promise<ActionResult> {
-	const { supabase } = await requireAdmin()
+	const { user, supabase } = await requireAdmin()
 
 	const parsed = updateStatusSchema.safeParse({ creatorId, status })
 	if (!parsed.success) {
 		return { success: false, error: 'errors.invalidInput' }
+	}
+
+	const { data: previous, error: readError } = await supabase
+		.from('creators')
+		.select('id, status, profile_id')
+		.eq('id', parsed.data.creatorId)
+		.single()
+
+	if (readError || !previous) {
+		return { success: false, error: 'errors.couldNotUpdateCreatorStatus' }
 	}
 
 	const { error: updateError } = await supabase
@@ -95,6 +122,18 @@ export async function updateCreatorStatus(
 		return { success: false, error: 'errors.couldNotUpdateCreatorStatus' }
 	}
 
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'creator.status_changed',
+		targetType: 'creator',
+		targetId: parsed.data.creatorId,
+		metadata: {
+			previousStatus: previous.status,
+			nextStatus: parsed.data.status,
+			profileId: previous.profile_id,
+		},
+	})
+
 	revalidatePath('/admin')
 	revalidatePath('/admin/users')
 	revalidatePath('/admin/creators')
@@ -104,7 +143,7 @@ export async function updateCreatorStatus(
 }
 
 export async function deleteUser(userId: string): Promise<ActionResult> {
-	const { user } = await requireAdmin()
+	const { user, supabase } = await requireAdmin()
 
 	if (!z.string().uuid().safeParse(userId).success) {
 		return { success: false, error: 'errors.invalidUserId' }
@@ -114,6 +153,12 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
 		return { success: false, error: 'errors.cannotDeleteOwnAccount' }
 	}
 
+	const { data: target } = await supabase
+		.from('profiles')
+		.select('id, email, role, full_name')
+		.eq('id', userId)
+		.single()
+
 	const adminClient = createAdminClient()
 	const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
 
@@ -121,6 +166,18 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
 		console.error('[deleteUser]', deleteError)
 		return { success: false, error: 'errors.couldNotDeleteUser' }
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'user.deleted',
+		targetType: 'profile',
+		targetId: userId,
+		metadata: {
+			email: target?.email ?? null,
+			role: target?.role ?? null,
+			fullName: target?.full_name ?? null,
+		},
+	})
 
 	revalidatePath('/admin')
 	revalidatePath('/admin/users')
@@ -152,7 +209,7 @@ export async function verifyBusinessOrgNumber(
 
 	const { data: business, error: readError } = await supabase
 		.from('businesses')
-		.select('id, profile_id, org_number')
+		.select('id, profile_id, org_number, org_number_verification')
 		.eq('id', parsed.data.businessId)
 		.single()
 
@@ -184,6 +241,19 @@ export async function verifyBusinessOrgNumber(
 		console.error('[verifyBusinessOrgNumber]', updateError)
 		return { success: false, error: 'errors.couldNotVerifyOrgNumber' }
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'business.org_verified',
+		targetType: 'business',
+		targetId: parsed.data.businessId,
+		metadata: {
+			previousDecision: business.org_number_verification,
+			decision: parsed.data.decision,
+			profileId: business.profile_id,
+			note: parsed.data.note ?? null,
+		},
+	})
 
 	revalidatePath('/admin/users')
 	revalidatePath(`/admin/users/${business.profile_id}`)

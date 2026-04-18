@@ -17,6 +17,8 @@ const pageTitleKeys: Record<string, string> = {
 	'/admin/content': 'contentManagement',
 	'/admin/reports': 'moderation',
 	'/admin/campaigns': 'campaigns',
+	'/admin/broadcasts': 'broadcasts',
+	'/admin/audit-log': 'auditLog',
 }
 
 export function AdminHeader() {

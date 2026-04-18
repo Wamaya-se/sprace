@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { logAuditEvent } from '@/lib/audit/log'
 import type { ActionResult } from '@/types/actions'
 import type { Database } from '@/types/supabase'
 
@@ -304,6 +305,18 @@ export async function resolveDispute(
 			}),
 		),
 	).catch((err) => console.error('[resolveDispute] notifications failed', err))
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'dispute.resolved',
+		targetType: 'dispute',
+		targetId: parsedId.data,
+		metadata: {
+			bookingId: booking.id,
+			resolution: parsed.data.resolution,
+			note: parsed.data.adminNote ?? null,
+		},
+	})
 
 	revalidatePath(`/dashboard/bookings/${booking.id}`)
 	revalidatePath('/dashboard/bookings')

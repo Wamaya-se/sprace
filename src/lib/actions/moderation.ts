@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { requireAdmin } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createNotification } from '@/lib/notifications'
+import { logAuditEvent } from '@/lib/audit/log'
 import {
 	resolveReportSchema,
 	suspendUserSchema,
@@ -77,6 +78,25 @@ export async function resolveReport(
 			console.error('[resolveReport] notification failed', err)
 		}
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action:
+			parsed.data.status === 'resolved'
+				? 'report.resolved'
+				: parsed.data.status === 'dismissed'
+					? 'report.dismissed'
+					: 'report.reviewing',
+		targetType: 'report',
+		targetId: report.id,
+		metadata: {
+			reporterId: report.reporter_id,
+			targetType: report.target_type,
+			targetId: report.target_id,
+			status: parsed.data.status,
+			note: parsed.data.adminNote ?? null,
+		},
+	})
 
 	revalidatePath('/admin/reports')
 	return { success: true, data: undefined }
@@ -159,6 +179,17 @@ export async function suspendUser(
 		console.error('[suspendUser] notification failed', err)
 	}
 
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'user.suspended',
+		targetType: 'profile',
+		targetId: parsedId.data,
+		metadata: {
+			role: target.role,
+			reason: parsed.data.reason,
+		},
+	})
+
 	revalidatePath('/admin/reports')
 	revalidatePath('/admin/users')
 	revalidatePath(`/admin/users/${parsedId.data}`)
@@ -174,7 +205,7 @@ export async function unsuspendUser(
 		return { success: false, error: 'errors.invalidUserId' }
 	}
 
-	const { supabase } = await requireAdmin()
+	const { user, supabase } = await requireAdmin()
 
 	const { data: target } = await supabase
 		.from('profiles')
@@ -215,6 +246,14 @@ export async function unsuspendUser(
 			console.error('[unsuspendUser] creator update failed', creatorError)
 		}
 	}
+
+	await logAuditEvent({
+		actorId: user.id,
+		action: 'user.unsuspended',
+		targetType: 'profile',
+		targetId: parsedId.data,
+		metadata: { role: target.role },
+	})
 
 	revalidatePath('/admin/reports')
 	revalidatePath('/admin/users')
