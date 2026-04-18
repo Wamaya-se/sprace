@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { AdminHeader } from '@/components/admin/admin-header'
+import { OnboardingTourLauncher } from '@/components/onboarding/onboarding-tour-launcher'
+import { shouldShowTour } from '@/lib/onboarding/version'
 
 export default async function AdminLayout({
 	children,
@@ -26,9 +28,11 @@ export default async function AdminLayout({
 
 	const { data: profile } = await supabase
 		.from('profiles')
-		.select('full_name')
+		.select('full_name, tour_completed_version')
 		.eq('id', user.id)
 		.single()
+
+	const showTour = shouldShowTour(profile?.tour_completed_version ?? null)
 
 	return (
 		<div className="flex min-h-screen bg-surface">
@@ -42,6 +46,7 @@ export default async function AdminLayout({
 					{children}
 				</main>
 			</div>
+			{showTour && <OnboardingTourLauncher role="admin" />}
 		</div>
 	)
 }

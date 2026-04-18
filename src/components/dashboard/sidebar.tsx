@@ -20,6 +20,7 @@ interface NavItem {
 	labelKey: string
 	href: string
 	icon: React.ReactNode
+	tourId?: string
 }
 
 const overviewIcon = (
@@ -233,28 +234,94 @@ const companyProfileIcon = (
 
 const creatorNavItems: NavItem[] = [
 	{ labelKey: 'overview', href: '/dashboard', icon: overviewIcon },
-	{ labelKey: 'analytics', href: '/dashboard/analytics', icon: analyticsIcon },
-	{ labelKey: 'bookings', href: '/dashboard/bookings', icon: bookingsIcon },
-	{ labelKey: 'campaigns', href: '/dashboard/campaigns', icon: campaignsIcon },
-	{ labelKey: 'messages', href: '/dashboard/messages', icon: messagesIcon },
-	{ labelKey: 'profile', href: '/dashboard/profile', icon: profileIcon },
-	{ labelKey: 'services', href: '/dashboard/services', icon: servicesIcon },
-	{ labelKey: 'earnings', href: '/dashboard/earnings', icon: earningsIcon },
+	{
+		labelKey: 'analytics',
+		href: '/dashboard/analytics',
+		icon: analyticsIcon,
+		tourId: 'nav-analytics',
+	},
+	{
+		labelKey: 'bookings',
+		href: '/dashboard/bookings',
+		icon: bookingsIcon,
+		tourId: 'nav-bookings',
+	},
+	{
+		labelKey: 'campaigns',
+		href: '/dashboard/campaigns',
+		icon: campaignsIcon,
+		tourId: 'nav-campaigns',
+	},
+	{
+		labelKey: 'messages',
+		href: '/dashboard/messages',
+		icon: messagesIcon,
+		tourId: 'nav-messages',
+	},
+	{
+		labelKey: 'profile',
+		href: '/dashboard/profile',
+		icon: profileIcon,
+		tourId: 'nav-profile',
+	},
+	{
+		labelKey: 'services',
+		href: '/dashboard/services',
+		icon: servicesIcon,
+		tourId: 'nav-services',
+	},
+	{
+		labelKey: 'earnings',
+		href: '/dashboard/earnings',
+		icon: earningsIcon,
+		tourId: 'nav-earnings',
+	},
 	{ labelKey: 'settings', href: '/dashboard/settings', icon: settingsIcon },
 ]
 
 const businessNavItems: NavItem[] = [
 	{ labelKey: 'overview', href: '/dashboard', icon: overviewIcon },
-	{ labelKey: 'analytics', href: '/dashboard/analytics', icon: analyticsIcon },
-	{ labelKey: 'discover', href: '/dashboard/discover', icon: discoverIcon },
-	{ labelKey: 'saved', href: '/dashboard/saved', icon: savedIcon },
-	{ labelKey: 'bookings', href: '/dashboard/bookings', icon: bookingsIcon },
-	{ labelKey: 'messages', href: '/dashboard/messages', icon: messagesIcon },
-	{ labelKey: 'campaigns', href: '/dashboard/campaigns', icon: campaignsIcon },
+	{
+		labelKey: 'analytics',
+		href: '/dashboard/analytics',
+		icon: analyticsIcon,
+		tourId: 'nav-analytics',
+	},
+	{
+		labelKey: 'discover',
+		href: '/dashboard/discover',
+		icon: discoverIcon,
+		tourId: 'nav-discover',
+	},
+	{
+		labelKey: 'saved',
+		href: '/dashboard/saved',
+		icon: savedIcon,
+		tourId: 'nav-saved',
+	},
+	{
+		labelKey: 'bookings',
+		href: '/dashboard/bookings',
+		icon: bookingsIcon,
+		tourId: 'nav-bookings',
+	},
+	{
+		labelKey: 'messages',
+		href: '/dashboard/messages',
+		icon: messagesIcon,
+		tourId: 'nav-messages',
+	},
+	{
+		labelKey: 'campaigns',
+		href: '/dashboard/campaigns',
+		icon: campaignsIcon,
+		tourId: 'nav-campaigns',
+	},
 	{
 		labelKey: 'companyProfile',
 		href: '/dashboard/profile',
 		icon: companyProfileIcon,
+		tourId: 'nav-profile',
 	},
 	{ labelKey: 'spending', href: '/dashboard/spending', icon: earningsIcon },
 	{ labelKey: 'settings', href: '/dashboard/settings', icon: settingsIcon },
@@ -422,6 +489,7 @@ export function Sidebar({
 								href={item.href}
 								onClick={() => setIsMobileOpen(false)}
 								aria-current={active ? 'page' : undefined}
+								data-tour={item.tourId}
 								className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium duration-150 ${
 									active
 										? 'bg-surface-container-high text-foreground'

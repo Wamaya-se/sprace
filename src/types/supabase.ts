@@ -1103,6 +1103,7 @@ export type Database = {
           suspension_reason: string | null
           tos_accepted_at: string | null
           tos_version: string | null
+          tour_completed_version: string | null
           updated_at: string
         }
         Insert: {
@@ -1120,6 +1121,7 @@ export type Database = {
           suspension_reason?: string | null
           tos_accepted_at?: string | null
           tos_version?: string | null
+          tour_completed_version?: string | null
           updated_at?: string
         }
         Update: {
@@ -1137,6 +1139,7 @@ export type Database = {
           suspension_reason?: string | null
           tos_accepted_at?: string | null
           tos_version?: string | null
+          tour_completed_version?: string | null
           updated_at?: string
         }
         Relationships: [

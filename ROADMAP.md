@@ -482,9 +482,23 @@ _Allt som krävs för att skeppa till riktiga användare._
 - [x] Tests: `tests/unit/admin-schemas.test.ts` (15 tester) — createBroadcast/sendBroadcast/auditLogFilters-scheman.
 - [x] Quality review: typecheck ✓, lint ✓, test ✓ (169/169).
 
-### Fas 10b–10f — kvar
+### Fas 10b — Onboarding-guide (klar)
 
-- [ ] 10b: Onboarding-guide (tooltip-tour för nya användare)
+- [x] Migration `20260421120000_onboarding_tour.sql`: `profiles.tour_completed_version text` (nullable, ≤32 tecken). Null eller avvikande från `CURRENT_TOUR_VERSION` triggar touren — ingen datamigration behövs vid bump.
+- [x] Pure-moduler: `src/lib/onboarding/version.ts` (`CURRENT_TOUR_VERSION`, `shouldShowTour`) och `src/lib/onboarding/tour-steps.ts` (steg per roll, `clampStepIndex`, `getTourSteps`). Rollspecifika flöden: creator (9 steg), business (9 steg), admin (8 steg), alla startar med centrerad welcome och slutar med centrerad finish.
+- [x] `OnboardingTour` client-komponent: fixed-overlay med spotlight (box-shadow cutout + `ring-2 ring-brand/80`), positionerat kort (höger/botten/vänster/topp med klamp mot viewport, action-sheet-mönster på mobil), Progress-bar, `role="dialog"` + `aria-modal` + `aria-labelledby/describedby`, Escape stänger, ArrowLeft/Right navigerar, Tab-trap inne i kortet, body-overflow-lock, focus restore till tidigare fokusert element.
+- [x] `OnboardingTourLauncher`: deferrad en RAF efter hydration så sidebar-DOM är mätbar innan spotlight ritas.
+- [x] Server Actions `src/lib/actions/onboarding.ts`: `completeOnboardingTour` (sätter version) och `resetOnboardingTour` (null), båda via `requireUser()` + `ActionResult`, revalidatePath på `/dashboard`, `/admin`, `/dashboard/settings`.
+- [x] Mountad i `(dashboard)/layout.tsx` och `(admin)/admin/layout.tsx` bakom `shouldShowTour(profile.tour_completed_version)`. Creator-default när `role` inte är `business`.
+- [x] `data-tour` ankare på creator-/business-/admin-sidebar nav-items (`nav-analytics`, `nav-bookings`, `nav-discover`, `nav-users`, `nav-reports`, `nav-audit-log`, …).
+- [x] Settings → "Getting started": `ReplayTourSection` (useTransition, router.push+refresh, role="alert" på fel) + nytt `settings.replay*` + `settings.gettingStarted` i `messages/en.json`.
+- [x] i18n: nytt `tour`-namespace med nästlade `welcome/finished/creator/business/admin.*.title/description` + `stepOf/back/next/finish/skip` (~52 nycklar).
+- [x] `src/types/supabase.ts` synkat manuellt (Row/Insert/Update) med nya kolumnen.
+- [x] Tester: `tests/unit/onboarding-tour.test.ts` (13 st) — `shouldShowTour`, `clampStepIndex`, `getTourSteps` (stable reference, unika ids, welcome+finished start/slut, target non-empty för non-center, nyckel-format).
+- [x] Quality review: typecheck ✓, lint ✓ (fixade `react-hooks/set-state-in-effect` genom att slopa `isMounted`-flaggan), tester ✓ (182/182), i18n ✓. Shadcn Button/Progress används genomgående, theme-aware tokens, inga hårdkodade strängar, Tab-trap + Escape + focus-restore.
+
+### Fas 10c–10f — kvar
+
 - [ ] 10c: Rate limiting (login, registration, Server Actions — app-nivå)
 - [ ] 10d: Responsiv polish-pass (alla sidor, alla breakpoints)
 - [ ] 10e: Performance-pass (lazy loading, image optimization, cache headers, bundle-analys)

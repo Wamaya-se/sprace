@@ -647,6 +647,127 @@
 		"priceFormatted": "{price} SEK",
 		"removeImage": "Remove image"
 	},
+	"tour": {
+		"stepOf": "Step {current} of {total}",
+		"back": "Back",
+		"next": "Next",
+		"finish": "Finish",
+		"skip": "Skip tour",
+		"welcome": {
+			"creator": {
+				"title": "Welcome to Sprace",
+				"description": "Here's a quick tour of your creator dashboard — two minutes and you're set. Use the arrow keys or click Next to start."
+			},
+			"business": {
+				"title": "Welcome to Sprace",
+				"description": "Let's walk through your business dashboard so you can start finding and booking creators straight away."
+			},
+			"admin": {
+				"title": "Welcome to the admin panel",
+				"description": "A short tour of the moderation and operations tools you have at your disposal."
+			}
+		},
+		"finished": {
+			"creator": {
+				"title": "You're all set",
+				"description": "That's the tour. Complete your profile next so brands can discover you — you can always replay this tour from Settings."
+			},
+			"business": {
+				"title": "You're all set",
+				"description": "That's the tour. Head over to Find creators to browse talent, or create your first brief from Bookings. You can replay this tour from Settings."
+			},
+			"admin": {
+				"title": "You're all set",
+				"description": "That's the tour. The audit log records every admin action, so you can always trace back what happened."
+			}
+		},
+		"creator": {
+			"analytics": {
+				"title": "Analytics",
+				"description": "Track revenue, bookings, and ratings over time. Filter by week, month, quarter, or year."
+			},
+			"bookings": {
+				"title": "Bookings",
+				"description": "All briefs from brands land here. Accept, deliver, and complete work — and get paid when a business approves your delivery."
+			},
+			"campaigns": {
+				"title": "Campaigns",
+				"description": "Browse open campaigns from brands and pitch to join. Great for multi-creator collaborations and bigger budgets."
+			},
+			"messages": {
+				"title": "Messages",
+				"description": "Chat with brands in real time. Every booking has a thread, plus you can start direct conversations."
+			},
+			"profile": {
+				"title": "Profile",
+				"description": "This is your public page. Keep your bio, specialties, and links fresh so brands can find you."
+			},
+			"services": {
+				"title": "Services",
+				"description": "Productize what you offer — UGC videos, posts, full campaigns. Businesses book the service directly from your profile."
+			},
+			"earnings": {
+				"title": "Earnings",
+				"description": "Payout statements, quarterly summaries, and CSV exports for your bookkeeping."
+			}
+		},
+		"business": {
+			"discover": {
+				"title": "Find creators",
+				"description": "Search and filter by specialty, market, and rate. Save the ones that feel right."
+			},
+			"saved": {
+				"title": "Saved creators",
+				"description": "Your shortlist lives here. Come back when you're ready to send a brief."
+			},
+			"bookings": {
+				"title": "Bookings",
+				"description": "Your active and past collaborations. Send briefs, review deliveries, and approve work from one place."
+			},
+			"campaigns": {
+				"title": "Campaigns",
+				"description": "Post one brief and let multiple creators apply. Shortlist, negotiate, and book at scale."
+			},
+			"messages": {
+				"title": "Messages",
+				"description": "All your conversations with creators — every booking has its own thread."
+			},
+			"analytics": {
+				"title": "Analytics",
+				"description": "See spend over time, your top creators, and how your campaigns are performing."
+			},
+			"profile": {
+				"title": "Company profile",
+				"description": "Keep your company details and contact info up to date — creators see this when you send them a brief."
+			}
+		},
+		"admin": {
+			"users": {
+				"title": "Users",
+				"description": "Search, filter, and manage every account on the platform — change roles, suspend, or delete."
+			},
+			"creators": {
+				"title": "Creator review",
+				"description": "Approve new creator profiles and manage existing ones. The queue surfaces pending reviews first."
+			},
+			"reports": {
+				"title": "Reports",
+				"description": "User-submitted reports land here. Review, resolve, or dismiss — and suspend users when needed."
+			},
+			"disputes": {
+				"title": "Disputes",
+				"description": "Booking disputes between creators and businesses. Resolve with a refund, release, partial payout, or dismissal."
+			},
+			"broadcasts": {
+				"title": "Broadcasts",
+				"description": "Send announcements to all users, creators, or businesses at once. Drafts are safe to iterate on before sending."
+			},
+			"auditLog": {
+				"title": "Audit log",
+				"description": "An immutable trail of every sensitive admin action. Filter by actor or action to investigate."
+			}
+		}
+	},
 	"onboarding": {
 		"title": "Complete your profile",
 		"subtitle": "Let's set up your creator profile so brands can find and connect with you.",
@@ -1334,6 +1455,12 @@
 		"noPayouts": "No payouts yet.",
 		"loadMore": "Load more",
 		"loading": "Loading...",
+		"gettingStarted": "Getting started",
+		"replayTourTitle": "Replay product tour",
+		"replayTourDescription": "Take the guided tour again to rediscover the main features of your dashboard.",
+		"replayTour": "Replay tour",
+		"replayingTour": "Starting...",
+		"replayTourFailed": "Could not restart the tour. Please try again.",
 		"dataPrivacy": "Data & Privacy",
 		"exportDataTitle": "Export your data",
 		"dataExportDescription": "Download a copy of your profile, bookings, messages, and reviews in JSON format.",

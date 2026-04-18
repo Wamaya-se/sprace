@@ -9,6 +9,7 @@ import { StripeSettingsSection } from '@/components/dashboard/stripe-settings-se
 import { EmailNotificationToggle } from '@/components/dashboard/email-notification-toggle'
 import { DataExportSection } from '@/components/dashboard/data-export-section'
 import { DeleteAccountSection } from '@/components/dashboard/delete-account-section'
+import { ReplayTourSection } from '@/components/dashboard/replay-tour-section'
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('metadata')
@@ -182,6 +183,24 @@ export default async function SettingsPage() {
 					</section>
 				</>
 			)}
+			{/* Getting started */}
+			<Separator className="my-8" />
+			<section>
+				<h2 className="font-heading text-lg font-bold tracking-[-0.03em] text-foreground">
+					{t('gettingStarted')}
+				</h2>
+				<Card className="mt-4">
+					<CardContent className="py-4">
+						<h3 className="font-heading text-sm font-semibold tracking-[-0.03em] text-foreground">
+							{t('replayTourTitle')}
+						</h3>
+						<div className="mt-2">
+							<ReplayTourSection />
+						</div>
+					</CardContent>
+				</Card>
+			</section>
+
 			{/* Data & Privacy */}
 			<Separator className="my-8" />
 			<section>

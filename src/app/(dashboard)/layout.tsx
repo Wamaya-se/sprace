@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { getUnreadCount } from '@/lib/queries/messages'
 import { getUnreadNotificationCount } from '@/lib/notifications'
+import { OnboardingTourLauncher } from '@/components/onboarding/onboarding-tour-launcher'
+import { shouldShowTour } from '@/lib/onboarding/version'
 
 export default async function DashboardLayout({
 	children,
@@ -30,7 +32,7 @@ export default async function DashboardLayout({
 		await Promise.all([
 			supabase
 				.from('profiles')
-				.select('full_name, is_suspended')
+				.select('full_name, is_suspended, tour_completed_version')
 				.eq('id', user.id)
 				.single(),
 			getUnreadCount(),
@@ -40,6 +42,9 @@ export default async function DashboardLayout({
 	if (profile?.is_suspended) {
 		redirect('/suspended')
 	}
+
+	const showTour = shouldShowTour(profile?.tour_completed_version ?? null)
+	const tourRole = role === 'business' ? 'business' : 'creator'
 
 	return (
 		<div className="flex min-h-screen bg-surface">
@@ -60,6 +65,7 @@ export default async function DashboardLayout({
 					{children}
 				</main>
 			</div>
+			{showTour && <OnboardingTourLauncher role={tourRole} />}
 		</div>
 	)
 }

@@ -15,9 +15,26 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 
-const navItems = [
+const navItems: Array<{
+	labelKey:
+		| 'overview'
+		| 'analytics'
+		| 'users'
+		| 'creators'
+		| 'platformSettings'
+		| 'payments'
+		| 'disputes'
+		| 'moderation'
+		| 'contentManagement'
+		| 'campaigns'
+		| 'broadcasts'
+		| 'auditLog'
+	href: string
+	icon: React.ReactNode
+	tourId?: string
+}> = [
 	{
-		labelKey: 'overview' as const,
+		labelKey: 'overview',
 		href: '/admin',
 		icon: (
 			<svg
@@ -59,6 +76,7 @@ const navItems = [
 	{
 		labelKey: 'users' as const,
 		href: '/admin/users',
+		tourId: 'nav-users',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -79,6 +97,7 @@ const navItems = [
 	{
 		labelKey: 'creators' as const,
 		href: '/admin/creators',
+		tourId: 'nav-creators',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -144,6 +163,7 @@ const navItems = [
 	{
 		labelKey: 'disputes' as const,
 		href: '/admin/disputes',
+		tourId: 'nav-disputes',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -164,6 +184,7 @@ const navItems = [
 	{
 		labelKey: 'moderation' as const,
 		href: '/admin/reports',
+		tourId: 'nav-reports',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -229,6 +250,7 @@ const navItems = [
 	{
 		labelKey: 'broadcasts' as const,
 		href: '/admin/broadcasts',
+		tourId: 'nav-broadcasts',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -249,6 +271,7 @@ const navItems = [
 	{
 		labelKey: 'auditLog' as const,
 		href: '/admin/audit-log',
+		tourId: 'nav-audit-log',
 		icon: (
 			<svg
 				className="h-5 w-5"
@@ -414,6 +437,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
 								href={item.href}
 								onClick={() => setIsMobileOpen(false)}
 								aria-current={active ? 'page' : undefined}
+								data-tour={item.tourId}
 								className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-sans text-sm font-medium duration-150 ${
 									active
 										? 'bg-surface-container-high text-foreground'
