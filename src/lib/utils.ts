@@ -16,3 +16,28 @@ export function formatDate(iso: string): string {
 		return iso
 	}
 }
+
+/**
+ * Format a minor-unit (öre/cents) integer amount as a localized currency
+ * string, e.g. `formatMoney(15000, 'sek')` → `"150,00 SEK"`. Locale is
+ * fixed to `sv-SE` to match the rest of the app's number presentation.
+ */
+export function formatMoney(minor: number, currency: string = 'sek'): string {
+	const value = (minor / 100).toLocaleString('sv-SE', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
+	return `${value} ${currency.toUpperCase()}`
+}
+
+/**
+ * Format a minor-unit amount with thousands grouping but without
+ * decimals — useful for charts and KPI cards where decimals add noise.
+ */
+export function formatMoneyShort(
+	minor: number,
+	currency: string = 'sek',
+): string {
+	const value = Math.round(minor / 100).toLocaleString('sv-SE')
+	return `${value} ${currency.toUpperCase()}`
+}

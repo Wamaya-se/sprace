@@ -6,9 +6,22 @@ import { z } from 'zod'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import type { ActionResult } from '@/types/actions'
+import {
+	approveDelivery as approveDeliveryAction,
+	requestRevision as requestRevisionAction,
+} from '@/lib/actions/delivery-review'
 
-export { approveDelivery, requestRevision } from '@/lib/actions/delivery-review'
-export type { DeliveryItem } from '@/lib/queries/deliveries'
+export async function approveDelivery(
+	...args: Parameters<typeof approveDeliveryAction>
+) {
+	return approveDeliveryAction(...args)
+}
+
+export async function requestRevision(
+	...args: Parameters<typeof requestRevisionAction>
+) {
+	return requestRevisionAction(...args)
+}
 
 const bookingIdSchema = z.string().uuid()
 

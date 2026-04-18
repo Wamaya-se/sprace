@@ -1,3 +1,7 @@
 'use server'
 
-export { logOut } from '@/lib/actions/auth'
+import { logOut as logOutAction } from '@/lib/actions/auth'
+
+export async function logOut() {
+	return logOutAction()
+}

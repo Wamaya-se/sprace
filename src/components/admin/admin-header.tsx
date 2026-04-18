@@ -8,6 +8,7 @@ import { logOut } from '@/app/(admin)/actions'
 
 const pageTitleKeys: Record<string, string> = {
 	'/admin': 'overview',
+	'/admin/analytics': 'analytics',
 	'/admin/users': 'users',
 	'/admin/creators': 'creators',
 	'/admin/payments': 'payments',

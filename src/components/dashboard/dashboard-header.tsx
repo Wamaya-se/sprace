@@ -10,6 +10,7 @@ import { useRealtimeNotifications } from '@/hooks/use-realtime-notifications'
 
 const creatorTitleKeys: Record<string, string> = {
 	'/dashboard': 'overview',
+	'/dashboard/analytics': 'analytics',
 	'/dashboard/bookings': 'bookings',
 	'/dashboard/messages': 'messages',
 	'/dashboard/notifications': 'notifications',
@@ -23,6 +24,7 @@ const creatorTitleKeys: Record<string, string> = {
 
 const businessTitleKeys: Record<string, string> = {
 	'/dashboard': 'overview',
+	'/dashboard/analytics': 'analytics',
 	'/dashboard/discover': 'discover',
 	'/dashboard/saved': 'saved',
 	'/dashboard/bookings': 'bookings',

@@ -10,11 +10,18 @@ import { env } from '@/lib/env'
 import type { ActionResult } from '@/types/actions'
 import * as paymentsQuery from '@/lib/queries/payments'
 import * as stripeQuery from '@/lib/queries/stripe'
-
-export {
-	createStripeConnectAccount,
-	getStripeOnboardingLink,
+import {
+	createStripeConnectAccount as createStripeConnectAccountAction,
+	getStripeOnboardingLink as getStripeOnboardingLinkAction,
 } from '@/lib/actions/stripe-connect'
+
+export async function createStripeConnectAccount() {
+	return createStripeConnectAccountAction()
+}
+
+export async function getStripeOnboardingLink() {
+	return getStripeOnboardingLinkAction()
+}
 
 export async function getStripeAccountStatus() {
 	return stripeQuery.getStripeAccountStatus()

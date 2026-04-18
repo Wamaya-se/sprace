@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.4"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -231,16 +236,58 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "businesses_org_number_verified_by_fkey"
-            columns: ["org_number_verified_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "businesses_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          last_message_at: string
+          participant_one: string
+          participant_two: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          participant_one: string
+          participant_two: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          participant_one?: string
+          participant_two?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_participant_one_fkey"
+            columns: ["participant_one"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_participant_two_fkey"
+            columns: ["participant_two"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -292,97 +339,6 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: true
             referencedRelation: "creators"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pii_access_log: {
-        Row: {
-          actor_id: string
-          created_at: string
-          field: string
-          id: string
-          reason: string | null
-          subject_id: string
-        }
-        Insert: {
-          actor_id: string
-          created_at?: string
-          field: string
-          id?: string
-          reason?: string | null
-          subject_id: string
-        }
-        Update: {
-          actor_id?: string
-          created_at?: string
-          field?: string
-          id?: string
-          reason?: string | null
-          subject_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pii_access_log_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pii_access_log_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      conversations: {
-        Row: {
-          booking_id: string | null
-          created_at: string
-          id: string
-          last_message_at: string
-          participant_one: string
-          participant_two: string
-        }
-        Insert: {
-          booking_id?: string | null
-          created_at?: string
-          id?: string
-          last_message_at?: string
-          participant_one: string
-          participant_two: string
-        }
-        Update: {
-          booking_id?: string | null
-          created_at?: string
-          id?: string
-          last_message_at?: string
-          participant_one?: string
-          participant_two?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_participant_one_fkey"
-            columns: ["participant_one"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_participant_two_fkey"
-            columns: ["participant_two"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -804,6 +760,33 @@ export type Database = {
           },
         ]
       }
+      pii_access_log: {
+        Row: {
+          actor_id: string
+          created_at: string
+          field: string
+          id: string
+          reason: string | null
+          subject_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          field: string
+          id?: string
+          reason?: string | null
+          subject_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          field?: string
+          id?: string
+          reason?: string | null
+          subject_id?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           key: string
@@ -938,42 +921,6 @@ export type Database = {
           {
             foreignKeyName: "reports_resolved_by_fkey"
             columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_blocks: {
-        Row: {
-          blocked_id: string
-          blocker_id: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          blocked_id: string
-          blocker_id: string
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          blocked_id?: string
-          blocker_id?: string
-          created_at?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_blocks_blocked_id_fkey"
-            columns: ["blocked_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_blocks_blocker_id_fkey"
-            columns: ["blocker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1189,16 +1136,167 @@ export type Database = {
         }
         Relationships: []
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      _analytics_validate_bucket: {
+        Args: { p_bucket: string }
+        Returns: string
+      }
       assign_payout_statement_number: {
         Args: { p_payment_id: string }
         Returns: string
       }
       assign_receipt_number: { Args: { p_payment_id: string }; Returns: string }
+      get_admin_analytics_summary: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          completed_bookings_count: number
+          gross_volume_minor: number
+          new_businesses_count: number
+          new_creators_count: number
+          new_users_count: number
+          payments_count: number
+          payout_volume_minor: number
+          platform_fee_minor: number
+          prev_completed_bookings_count: number
+          prev_gross_volume_minor: number
+          prev_new_users_count: number
+          prev_platform_fee_minor: number
+          refund_volume_minor: number
+        }[]
+      }
+      get_admin_revenue_timeseries: {
+        Args: { p_bucket?: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          bucket_start: string
+          gross_volume_minor: number
+          payments_count: number
+          payout_volume_minor: number
+          platform_fee_minor: number
+        }[]
+      }
+      get_admin_top_categories: {
+        Args: { p_end_date: string; p_limit?: number; p_start_date: string }
+        Returns: {
+          bookings_count: number
+          completed_bookings_count: number
+          gross_volume_minor: number
+          name: string
+          slug: string
+          specialty_id: string
+        }[]
+      }
+      get_admin_user_growth_timeseries: {
+        Args: { p_bucket?: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          bucket_start: string
+          business_count: number
+          creator_count: number
+          total_count: number
+        }[]
+      }
+      get_business_analytics_summary: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          active_bookings_count: number
+          bookings_count: number
+          completed_count: number
+          payments_count: number
+          prev_bookings_count: number
+          prev_completed_count: number
+          prev_payments_count: number
+          prev_spending_minor: number
+          spending_minor: number
+        }[]
+      }
+      get_business_spending_timeseries: {
+        Args: { p_bucket?: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          bucket_start: string
+          payments_count: number
+          spending_minor: number
+        }[]
+      }
+      get_business_top_creators: {
+        Args: { p_end_date: string; p_limit?: number; p_start_date: string }
+        Returns: {
+          avatar_url: string
+          bookings_count: number
+          creator_id: string
+          display_name: string
+          slug: string
+          spending_minor: number
+        }[]
+      }
+      get_creator_analytics_summary: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          avg_rating: number
+          bookings_count: number
+          completed_count: number
+          payouts_count: number
+          prev_bookings_count: number
+          prev_completed_count: number
+          prev_payouts_count: number
+          prev_revenue_minor: number
+          revenue_minor: number
+          review_count: number
+        }[]
+      }
+      get_creator_bookings_by_status: {
+        Args: { p_end_date: string; p_start_date: string }
+        Returns: {
+          count: number
+          status: Database["public"]["Enums"]["booking_status"]
+        }[]
+      }
+      get_creator_revenue_timeseries: {
+        Args: { p_bucket?: string; p_end_date: string; p_start_date: string }
+        Returns: {
+          bucket_start: string
+          payouts_count: number
+          revenue_minor: number
+        }[]
+      }
       get_user_conversations_with_last_message: {
         Args: never
         Returns: {
@@ -1277,11 +1375,6 @@ export type Database = {
         | "resolved_partial"
         | "dismissed"
       media_type: "image" | "video"
-      org_number_verification_status:
-        | "unverified"
-        | "pending"
-        | "verified"
-        | "rejected"
       notification_type:
         | "booking_created"
         | "booking_accepted"
@@ -1303,6 +1396,11 @@ export type Database = {
         | "dispute_resolved"
         | "report_resolved"
         | "account_suspended"
+      org_number_verification_status:
+        | "unverified"
+        | "pending"
+        | "verified"
+        | "rejected"
       payment_status:
         | "pending"
         | "captured"
@@ -1461,12 +1559,6 @@ export const Constants = {
       ],
       creator_status: ["draft", "pending_review", "active", "suspended"],
       delivery_status: ["submitted", "approved", "revision_requested"],
-      org_number_verification_status: [
-        "unverified",
-        "pending",
-        "verified",
-        "rejected",
-      ],
       dispute_status: [
         "open",
         "under_review",
@@ -1495,6 +1587,14 @@ export const Constants = {
         "delivery_approved",
         "dispute_opened",
         "dispute_resolved",
+        "report_resolved",
+        "account_suspended",
+      ],
+      org_number_verification_status: [
+        "unverified",
+        "pending",
+        "verified",
+        "rejected",
       ],
       payment_status: [
         "pending",
@@ -1503,8 +1603,16 @@ export const Constants = {
         "refunded",
         "failed",
       ],
+      report_category: [
+        "spam",
+        "fraud",
+        "harassment",
+        "inappropriate",
+        "other",
+      ],
+      report_status: ["pending", "reviewing", "resolved", "dismissed"],
+      report_target_type: ["profile", "booking"],
       user_role: ["creator", "business", "admin"],
     },
   },
 } as const
-

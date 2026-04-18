@@ -1,6 +1,6 @@
 # Sprace — Roadmap
 
-> Updated: 2026-04-17 (session 15, full refactor) | Format: compact, token-efficient. Update after each session.
+> Updated: 2026-04-18 (Fas 8a–e) | Format: compact, token-efficient. Update after each session.
 
 ## Completed Refactor Sprint — 2026-04-17 ✅
 
@@ -393,11 +393,59 @@ _Lagkrav för svensk marknadsplats som hanterar betalningar._
 
 _Ger användarna data som ökar retention._
 
-- [ ] Creator dashboard: intäkter (månad/totalt), antal bokningar, betygssnitt, trendpilar
-- [ ] Business dashboard: spenderat belopp, aktiva bokningar, top-kreatörer
-- [ ] Admin dashboard: plattformsomsättning, avgiftsintäkter, användartrend, populära kategorier
-- [ ] Diagramkomponenter (Recharts eller Chart.js)
-- [ ] Datumfilter (denna vecka / månad / kvartal / år)
+### 8a. DB-lager ✅
+
+- [x] Migration `20260418120000_analytics_rpcs.sql` med 10 RPCer + en intern bucket-validator
+  - Creator: `get_creator_analytics_summary`, `get_creator_revenue_timeseries`, `get_creator_bookings_by_status`
+  - Business: `get_business_analytics_summary`, `get_business_spending_timeseries`, `get_business_top_creators`
+  - Admin: `get_admin_analytics_summary`, `get_admin_revenue_timeseries`, `get_admin_user_growth_timeseries`, `get_admin_top_categories`
+- [x] Säkerhet: alla `SECURITY INVOKER` (creator/business filtreras automatiskt av RLS, admin har explicit `if not public.is_admin() then raise 'forbidden'` överst). Bucket-parameter valideras mot allowlist (day/week/month/quarter/year) — ingen SQL-injection.
+- [x] Timeseries-RPCer är gap-fyllda via `generate_series` + `left join` så klienten slipper logik för tomma buckets.
+- [x] Föregående period uträknad i alla summary-RPCer för trendpilar (matchad längd, `[start − (end−start), start)`).
+- [x] TypeScript types tillagda manuellt i `src/types/supabase.ts` (CLI `gen types` saknar privilege på Supabase-projektet — manuell sync dokumenterad nedan).
+- [x] Server-side query-helpers i `src/lib/queries/analytics.ts` (alla wrapped i `React.cache()` för per-request dedup) med exporterade typer för konsumenter.
+- [x] Pure helpers i `src/lib/analytics/range.ts`: `resolveAnalyticsRange()` (vecka/månad/kvartal/år/30d/90d/12m → range + default bucket), `trendDelta()` (returnerar `null` när previous=0 så UI kan visa "—" istället för "+∞").
+- [x] Unit-tester: `tests/unit/analytics-range.test.ts` (15 tester) — 116/116 totalt grön.
+- [x] Verifierat: `npm run typecheck` clean, `npm run lint` 0/0, `npm run test:run` 116/116.
+
+### 8b. Creator dashboard ✅
+
+- [x] Ny sida `/dashboard/analytics` (Server Component) med role-guard (creator → creator-gren).
+- [x] 4 KPI-kort med trendpilar: Revenue, New bookings, Completed, Avg rating (reviews-count som sekundärtext).
+- [x] `RevenueChart` (area chart, Recharts) med tom-state, k/M-suffix på Y-axel, bucket-aware X-axel.
+- [x] `BookingsStatusChart` (bar chart) — översätter status-enum via `analytics.bookingStatus.*`.
+- [x] Sidebar + header-item "Analytics" för creator.
+
+### 8c. Business dashboard ✅
+
+- [x] Samma sida `/dashboard/analytics` grenar på `app_metadata.role === 'business'` (en URL, två vyer — sparar sidebar-item).
+- [x] 4 KPI-kort: Spending, New bookings, Active bookings (utan trend — nu-tillstånd), Completed.
+- [x] Spending-chart återanvänder `RevenueChart` med business-översättningar (`kpiSpending`, `spendingChartTitle`).
+- [x] `TopCreatorsTable` (Server Component) — avatar + länk till `dashboard/discover/[slug]`, SEK-format och plural-aware booking-label.
+- [x] Sidebar + header-item "Analytics" för business.
+
+### 8d. Admin dashboard ✅
+
+- [x] Ny sida `/admin/analytics` (Server Component) + `loading.tsx` skelett med 8 KPI-slots.
+- [x] 8 KPI-kort: GMV, Platform fees, Creator payouts, Refunds, Completed, New users, New creators, New businesses.
+- [x] `MultiAreaChart` — generisk flerseriga area chart (money | count) som driver både GMV-chart (GMV / fees / payouts) och User-growth-chart (creators vs businesses). Använder `--chart-1/3/5`-tokens.
+- [x] `TopCategoriesTable` — top-10 kategorier med bokningar, completed, GMV.
+- [x] Sidebar + header-item "Analytics" för admin (med stapel-ikon) placerad efter "Overview".
+
+### 8e. Datumfilter + diagramkomponenter ✅
+
+- [x] `RangePicker` (Client Component) — pill-knappar denna vecka/månad/kvartal/år/30d/90d/12m, driver URL search param `?range=` via `useRouter` + `useTransition`. Delas av alla tre dashboards.
+- [x] `KpiCard` + `TrendBadge` — återanvändbara presentationskomponenter; trendbadge har screen-reader-hint + arrow-direction.
+- [x] Recharts installerat som dep, CSS-variabel-baserad palett för dark-mode-parity.
+
+### Verifiering (Fas 8a–e)
+
+- [x] `npm run typecheck`, `npm run lint`, `npm run test:run` — alla gröna (116/116 tester).
+- [x] Creator-vy verifierad i browser: KPI:er, revenue-chart, bookings-status-chart, range picker (ex. `?range=this_year`).
+- [x] Business-vy verifierad i browser: KPI:er (0 SEK spend, 2 active), spending-chart empty state, top-creators empty state.
+- [x] Admin-vy verifierad i browser: 8 KPI:er (4 new users, 1 creator, 2 businesses), user-growth-chart renderar data, GMV-chart empty state, top-categories empty state.
+- [x] Quality review genomförd: landmarks + heading-hierarki (layout=h1, page=h2), role-guard både i middleware och sida, i18n 100% för nya strängar (32/32), Shadcn `Avatar`/`Card` används, SQL `security invoker` + RLS, `robots.ts` disallowar `/admin/` (var inte tidigare blockerad).
+- [x] A11y: `RangePicker` är `role="group"` med `aria-pressed` + `aria-label`; `MultiAreaChart`/`RevenueChart` har `role="img"` + `aria-label` (total + periodbeskrivning); chart-färger från `--chart-1/3/5`-tokens som justeras för dark mode.
 
 ## Fas 9: Campaign Management
 

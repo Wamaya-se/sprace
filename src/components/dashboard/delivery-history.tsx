@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import type { DeliveryItem } from '@/lib/actions/deliveries'
+import type { DeliveryItem } from '@/lib/queries/deliveries'
 import { DeliveryReview } from '@/components/dashboard/delivery-review'
 import { DeliveryFileGrid } from '@/components/dashboard/delivery-file-grid'
 
