@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 
 /**
  * Legal-entity details for "Sprace AB" used on receipts, payout statements
@@ -39,7 +39,7 @@ const FALLBACK: PlatformEntity = {
 }
 
 async function fetchPlatformEntity(): Promise<PlatformEntity> {
-	const supabase = await createClient()
+	const supabase = createPublicClient()
 	const { data, error } = await supabase
 		.from('platform_settings')
 		.select('key, value')

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { unstable_cache } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import { env } from '@/lib/env'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const getCategoriesWithCounts = unstable_cache(
 	async () => {
-		const supabase = await createClient()
+		const supabase = createPublicClient()
 
 		const { data: specialties } = await supabase
 			.from('specialties')

@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 
 export interface PublicLandingStats {
 	activeCreators: number
@@ -7,7 +7,7 @@ export interface PublicLandingStats {
 }
 
 async function fetchStats(): Promise<PublicLandingStats> {
-	const supabase = await createClient()
+	const supabase = createPublicClient()
 	const { data, error } = await supabase.rpc('public_landing_stats')
 
 	if (error) {
